@@ -11,14 +11,12 @@ from telegram.ext import (
     filters,
 )
 
-# Настройка лагавання для адсочвання падзей у кансолі Render
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 
-# Спасылка на ваш задэплоены Web App на GitHub Pages
 WEB_APP_URL = "https://flatislove.github.io/Statistics/"
 
 
@@ -27,15 +25,14 @@ async def start_command(
 ) -> None:
     user = update.effective_user
 
-    # Кнопка для адкрыцця Web App
     keyboard = [
-        [KeyboardButton(text="📱 Адкрыць Web App", web_app=WebAppInfo(url=WEB_APP_URL))]
+        [KeyboardButton(text="📱 Открыть Web App", web_app=WebAppInfo(url=WEB_APP_URL))]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     welcome_text = (
-        f"Прывіт, {user.first_name}! 👋\n\n"
-        "Націсні кнопку ніжэй, каб адкрыць Web App:"
+        f"Привет, {user.first_name}! 👋\n\n"
+        "Нажми кнопку ниже, чтобы открыть Web App:"
     )
     await update.message.reply_text(welcome_text, reply_markup=reply_markup)
 
@@ -43,57 +40,51 @@ async def start_command(
 async def help_command(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    await update.message.reply_text("Даступныя каманды:\n/start - Перезапусціць бота\n/help - Даведка")
+    await update.message.reply_text("Доступные команды:\n/start - Перезапустить бота\n/help - Справка")
 
 
 async def echo_message(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     user_text = update.message.text
-    await update.message.reply_text(f"Вы напісалі: {user_text}")
+    await update.message.reply_text(f"Вы написали: {user_text}")
 
 
 async def web_app_data_handler(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    """Прымае даныя, адпраўленыя з Web App па кнопцы tg.sendData()"""
     raw_data = update.effective_message.web_app_data.data
     data = json.loads(raw_data)
 
     await update.message.reply_text(
-        f"✅ Атрыманы даныя з Web App:\n{data.get('message', raw_data)}"
+        f"✅ Получены данные из Web App:\n{data.get('message', raw_data)}"
     )
 
 
 def main() -> None:
-    # Яўна ствараем event loop для сумяшчальнасці з Python 3.14+
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    # Бяспечнае атрыманне токена з Environment Variables
     token = os.environ.get("BOT_TOKEN")
 
     if not token:
-        logger.error("ПАМЫЛКА: Зменная асяроддзя BOT_TOKEN не зададзена!")
+        logger.error("ОШИБКА: Переменная окружения BOT_TOKEN не задана!")
         return
 
     app = ApplicationBuilder().token(token).build()
 
-    # Рэгістрацыя апрацоўшчыкаў
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("help", help_command))
 
-    # Апрацоўшчык даных з Web App
     app.add_handler(
         MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler)
     )
 
-    # Апрацоўшчык звычайных тэкставых паведамленняў
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, echo_message)
     )
 
-    logger.info("Бот з падтрымкай Web App паспяхова запушчаны...")
+    logger.info("Бот с поддержкой Web App успешно запущен...")
     app.run_polling()
 
 
