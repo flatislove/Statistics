@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from telegram import Update
@@ -43,6 +44,10 @@ async def echo_message(
 
 
 def main() -> None:
+    # Исправление для Python 3.14+: явно создаем и устанавливаем event loop
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     token = os.environ.get(
         "BOT_TOKEN", "8691852267:AAFuIcUaaUsIFJAlQCbiuGk5RH5NjHzaI4A"
     )
