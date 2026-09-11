@@ -12,9 +12,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    document.getElementById("btn-back-to-settings").addEventListener("click", () => {
-        window.location.href = "settings.html";
-    });
+    const backBtn = document.getElementById("btn-back-to-settings");
+    if (backBtn) {
+        backBtn.addEventListener("click", () => {
+            window.location.href = "settings.html";
+        });
+    }
 
     await loadPlayersList(Number(communityId));
 
@@ -22,6 +25,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (addBtn) {
         addBtn.addEventListener("click", async () => {
             const input = document.getElementById("input-player-name");
+            if (!input) return;
+            
             const playerName = input.value.trim();
             if (!playerName) return;
 
