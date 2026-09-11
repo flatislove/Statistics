@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель администратора</title>
+    <title>Admin Panel</title>
     <link rel="stylesheet" href="./static/css/style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Панель администратора</h1>
+        <h1>Admin Panel</h1>
         
         <div class="card">
-            <h2>Создать новое комьюнити</h2>
+            <h2>Create New Community</h2>
             <form id="create-community-form">
-                <input type="text" id="community-name" placeholder="Название" required>
-                <input type="text" id="invite-code" placeholder="Уникальный код (slug)" required>
-                <button type="submit">Создать комьюнити</button>
+                <input type="text" id="community-name" placeholder="Name" required>
+                <input type="text" id="invite-code" placeholder="Unique code (slug)" required>
+                <button type="submit">Create Community</button>
             </form>
             <div id="message"></div>
         </div>
 
         <div class="card">
-            <h2>Список комьюнити</h2>
-            <div id="communities-list">Загрузка...</div>
+            <h2>Communities List</h2>
+            <div id="communities-list">Loading...</div>
         </div>
     </div>
 

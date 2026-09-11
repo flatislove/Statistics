@@ -24,7 +24,7 @@ class Player(Base):
     telegram_id = Column(BigInteger, nullable=True)
     username = Column(String(100), nullable=True)
     first_name = Column(String(100), nullable=False)
-    gender = Column(String(10), nullable=False)  # 'm' или 'f'
+    gender = Column(String(10), nullable=False) 
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     community = relationship("Community", back_populates="players")

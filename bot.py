@@ -42,12 +42,12 @@ async def create_community(
     if x_telegram_id != OWNER_TELEGRAM_ID:
         raise HTTPException(
             status_code=403, 
-            detail="Доступ запрещен. Только главный администратор может создавать комьюнити."
+            detail="Access denied. Only the main administrator can create communities."
         )
 
     existing = await db.execute(select(Community).where(Community.invite_code == invite_code))
     if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Комьюнити с таким инвайт-кодом уже существует.")
+        raise HTTPException(status_code=400, detail="Community with this invite code already exists.")
 
     new_community = Community(name=name, invite_code=invite_code)
     db.add(new_community)
@@ -64,18 +64,18 @@ async def get_communities(db: AsyncSession = Depends(get_db)):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("📱 Открыть Web App", web_app=WebAppInfo(url=WEBAPP_URL))]
+        [InlineKeyboardButton("📱 Open Web App", web_app=WebAppInfo(url=WEBAPP_URL))]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        "Привет! Добро пожаловать в систему статистики волейбольных матчей.",
+        "Hello! Welcome to the volleyball match statistics system.",
         reply_markup=reply_markup
     )
 
 async def init_db_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    logger.info("База данных и таблицы успешно инициализированы.")
+    logger.info("Database and tables successfully initialized.")
 
 async def main():
     await init_db_tables()
@@ -86,7 +86,7 @@ async def main():
     await ptb_app.initialize()
     await ptb_app.start()
     await ptb_app.updater.start_polling()
-    logger.info("Telegram-бот успешно запущен в режиме polling.")
+    logger.info("Telegram bot successfully started in polling mode.")
 
     import uvicorn
     port = int(os.environ.get("PORT", 10000))

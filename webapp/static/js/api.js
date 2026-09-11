@@ -10,7 +10,7 @@ function getTelegramId() {
 export async function fetchCommunities() {
     try {
         const response = await fetch(`${API_BASE_URL}/communities`);
-        if (!response.ok) throw new Error("Ошибка загрузки комьюнити");
+        if (!response.ok) throw new Error("Failed to load communities");
         return await response.json();
     } catch (error) {
         console.error(error);
@@ -29,7 +29,7 @@ export async function createCommunity(name, inviteCode) {
 
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(data.detail || "Ошибка создания комьюнити");
+        throw new Error(data.detail || "Failed to create community");
     }
     return data;
 }

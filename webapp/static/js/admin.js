@@ -16,13 +16,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         const communities = await fetchCommunities();
         listContainer.innerHTML = "";
         if (communities.length === 0) {
-            listContainer.innerHTML = "<p>Пока нет созданных комьюнити.</p>";
+            listContainer.innerHTML = "<p>No communities created yet.</p>";
             return;
         }
         communities.forEach(c => {
             const item = document.createElement("div");
             item.className = "card";
-            item.innerHTML = `<strong>${c.name}</strong><br><small>Код: ${c.invite_code}</small>`;
+            item.innerHTML = `<strong>${c.name}</strong><br><small>Code: ${c.invite_code}</small>`;
             listContainer.appendChild(item);
         });
     }
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
             await createCommunity(nameInput.value.trim(), codeInput.value.trim());
-            messageDiv.textContent = "Комьюнити успешно создано!";
+            messageDiv.textContent = "Community successfully created!";
             messageDiv.className = "success";
             nameInput.value = "";
             codeInput.value = "";
