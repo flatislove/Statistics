@@ -66,6 +66,14 @@ async def get_communities(db: AsyncSession = Depends(get_db)):
     communities = result.scalars().all()
     return [{"id": c.id, "name": c.name, "invite_code": c.invite_code} for c in communities]
 
+@app.get("/api/check-admin")
+async def check_admin(x_telegram_id: int = Header(..., alias="X-Telegram-Id")):
+    return {"is_admin": x_telegram_id == OWNER_TELEGRAM_ID}
+
+@app.get("/api/ping")
+async def ping_server():
+    return {"status": "ok"}
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("📱 Open Web App", web_app=WebAppInfo(url=WEBAPP_URL))]
