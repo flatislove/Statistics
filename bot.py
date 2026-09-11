@@ -40,10 +40,17 @@ async def get_db():
 @app.post("/api/communities")
 async def create_community(
     data: CommunityCreate,
-    x_telegram_id: int = Header(..., alias="X-Telegram-Id"),
+    x_telegram_id: str = Header(..., alias="X-Telegram-Id"),
     db: AsyncSession = Depends(get_db)
 ):
-    if x_telegram_id != OWNER_TELEGRAM_ID:
+    try:
+        user_id = int(x_telegram_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid Telegram ID format.")
+
+    logger.info(f"Create community request from user ID: {user_id} (Owner ID: {OWNER_TELEGRAM_ID})")
+
+    if user_id != OWNER_TELEGRAM_ID:
         raise HTTPException(
             status_code=403, 
             detail="Access denied. Only the main administrator can create communities."
@@ -67,8 +74,15 @@ async def get_communities(db: AsyncSession = Depends(get_db)):
     return [{"id": c.id, "name": c.name, "invite_code": c.invite_code} for c in communities]
 
 @app.get("/api/check-admin")
-async def check_admin(x_telegram_id: int = Header(..., alias="X-Telegram-Id")):
-    return {"is_admin": x_telegram_id == OWNER_TELEGRAM_ID}
+async def check_admin(x_telegram_id: str = Header(..., alias="X-Telegram-Id")):
+    try:
+        user_id = int(x_telegram_id)
+    except ValueError:
+        return {"is_admin": False}
+    
+    is_admin = (user_id == OWNER_TELEGRAM_ID)
+    logger.info(f"Check admin for user ID {user_id}: result = {is_admin}")
+    return {"is_admin": is_admin}
 
 @app.get("/api/ping")
 async def ping_server():
