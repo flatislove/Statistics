@@ -20,11 +20,17 @@ export async function fetchCommunities() {
 
 export async function createCommunity(name, inviteCode) {
     const telegramId = getTelegramId();
-    const response = await fetch(`${API_BASE_URL}/communities?name=${encodeURIComponent(name)}&invite_code=${encodeURIComponent(inviteCode)}`, {
+    
+    const response = await fetch(`${API_BASE_URL}/communities`, {
         method: "POST",
         headers: {
+            "Content-Type": "application/json",
             "X-Telegram-Id": telegramId.toString()
-        }
+        },
+        body: JSON.stringify({
+            name: name,
+            invite_code: inviteCode
+        })
     });
 
     const data = await response.json();
