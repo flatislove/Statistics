@@ -3,6 +3,7 @@ import asyncio
 import logging
 from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
@@ -28,15 +29,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class CommunityCreate(BaseModel):
+    name: str
+    invite_code: str
+
 async def get_db():
     async with async_session() as session:
         yield session
 
 @app.post("/api/communities")
 async def create_community(
-    name: str,
-    invite_code: str,
-    x_telegram_id: int = Header(...),
+    data: CommunityCreate,
+    x_telegram_id: int = Header(..., alias="X-Telegram-Id"),
     db: AsyncSession = Depends(get_db)
 ):
     if x_telegram_id != OWNER_TELEGRAM_ID:
@@ -45,11 +49,11 @@ async def create_community(
             detail="Access denied. Only the main administrator can create communities."
         )
 
-    existing = await db.execute(select(Community).where(Community.invite_code == invite_code))
+    existing = await db.execute(select(Community).where(Community.invite_code == data.invite_code))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Community with this invite code already exists.")
 
-    new_community = Community(name=name, invite_code=invite_code)
+    new_community = Community(name=data.name, invite_code=data.invite_code)
     db.add(new_community)
     await db.commit()
     await db.refresh(new_community)
