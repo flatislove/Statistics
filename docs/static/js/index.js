@@ -1,11 +1,4 @@
-import { fetchCommunities, createCommunity } from "./api.js";
-
-function getTelegramId() {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-        return window.Telegram.WebApp.initDataUnsafe.user?.id || 0;
-    }
-    return 0;
-}
+import { fetchCommunities, checkAdminStatus, createCommunity } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     if (window.Telegram && window.Telegram.WebApp) {
@@ -13,12 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.Telegram.WebApp.expand();
     }
 
-    const telegramId = getTelegramId();
-    
-    // Опционально: если у вас есть константа вашего ID, можно проверить её здесь 
-    // или положиться на защиту бэкенда, показывая админ-панель только вам.
-    // Для примера показываем админ-панель, если ID определен:
-    if (telegramId > 0) {
+    const isAdmin = await checkAdminStatus();
+    if (isAdmin) {
         const adminSection = document.getElementById("admin-section");
         if (adminSection) {
             adminSection.style.display = "block";
