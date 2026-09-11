@@ -69,3 +69,35 @@ export async function createCommunity(name, inviteCode) {
     }
     return data;
 }
+
+export async function fetchPlayers(communityId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/communities/${communityId}/players`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Error in fetchPlayers:", error);
+        return [];
+    }
+}
+
+export async function createPlayer(communityId, playerName) {
+    const telegramId = getTelegramId();
+    
+    const response = await fetch(`${API_BASE_URL}/communities/${communityId}/players`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Id": telegramId.toString()
+        },
+        body: JSON.stringify({
+            name: playerName
+        })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || `Server error: ${response.status}`);
+    }
+    return data;
+}
