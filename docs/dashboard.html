@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Volleyball Statistics</title>
+    <link rel="stylesheet" href="./static/css/style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 id="community-title">Community</h1>
+        
+        <button id="btn-back-to-communities" style="margin-bottom: 15px; background-color: #6c757d; color: white;">&larr; Back to Communities</button>
+
+        <div class="card">
+            <h2>Control Panel</h2>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button id="btn-match">Match</button>
+                <button id="btn-settings-players">Settings / Players</button>
+                <button id="btn-settings-teams">Settings / Teams</button>
+                <button id="btn-settings-history">Settings / History</button>
+                <button id="btn-reports">Reports</button>
+                <button id="btn-teams">Teams</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./static/js/dashboard.js"></script>
+</body>
+</html>

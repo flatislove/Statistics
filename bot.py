@@ -36,6 +36,9 @@ class CommunityCreate(BaseModel):
 class PlayerCreate(BaseModel):
     name: str
 
+class PlayerUpdate(BaseModel):
+    name: str
+
 async def get_db():
     async with async_session() as session:
         yield session
@@ -111,6 +114,54 @@ async def create_player(
     await db.refresh(new_player)
     
     return {"status": "success", "player_id": new_player.id, "name": new_player.name}
+
+@app.put("/api/players/{player_id}")
+async def update_player(
+    player_id: int,
+    data: PlayerUpdate,
+    x_telegram_id: str = Header(..., alias="X-Telegram-Id"),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        user_id = int(x_telegram_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid Telegram ID format.")
+
+    if user_id != OWNER_TELEGRAM_ID:
+        raise HTTPException(status_code=403, detail="Access denied.")
+
+    player = await db.get(Player, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found.")
+
+    player.name = data.name
+    await db.commit()
+    await db.refresh(player)
+    
+    return {"status": "success", "player_id": player.id, "name": player.name}
+
+@app.delete("/api/players/{player_id}")
+async def delete_player(
+    player_id: int,
+    x_telegram_id: str = Header(..., alias="X-Telegram-Id"),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        user_id = int(x_telegram_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid Telegram ID format.")
+
+    if user_id != OWNER_TELEGRAM_ID:
+        raise HTTPException(status_code=403, detail="Access denied.")
+
+    player = await db.get(Player, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found.")
+
+    await db.delete(player)
+    await db.commit()
+    
+    return {"status": "success", "deleted_id": player_id}
 
 @app.get("/api/check-admin")
 async def check_admin(x_telegram_id: str = Header(..., alias="X-Telegram-Id")):

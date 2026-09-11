@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volleyball Statistics</title>
+    <title>Volleyball Statistics - Home</title>
     <link rel="stylesheet" href="./static/css/style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -11,20 +11,15 @@
     <div class="container">
         <h1>Volleyball Statistics</h1>
         
+        <div class="card" style="text-align: center;">
+            <h2>Добро пожаловать</h2>
+            <p>Для работы с системой необходима авторизация.</p>
+            <button id="btn-go-login" style="background-color: #2481cc; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Войти в систему</button>
+        </div>
+
         <div class="card">
-            <h2>Select Community</h2>
+            <h2>Доступные сообщества</h2>
             <div id="communities-list">Loading communities...</div>
-        </div>
-
-        <div id="community-dashboard" class="card" style="display: none;">
-            <h2 id="selected-community-title">Community: None</h2>
-            <button id="btn-manage-players">Manage Players</button>
-            <button id="btn-match-days">Match Days</button>
-        </div>
-
-        <div id="admin-section" class="card" style="display: none;">
-            <h2>Control Panel</h2>
-            <button id="btn-create-community">Create Community</button>
         </div>
     </div>
 

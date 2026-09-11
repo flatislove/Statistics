@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players - Volleyball Statistics</title>
+    <link rel="stylesheet" href="./static/css/style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Players Management</h1>
+        
+        <button id="btn-back-to-settings" style="margin-bottom: 15px; background-color: #6c757d; color: white;">&larr; Back to Settings</button>
+
+        <div class="card">
+            <h2>Add Player</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="input-player-name" placeholder="Enter player name" style="flex: 1; padding: 8px;">
+                <button id="btn-add-player">Add</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Players List</h2>
+            <div id="players-list">Loading players...</div>
+        </div>
+    </div>
+
+    <script type="module" src="./static/js/players.js"></script>
+</body>
+</html>
