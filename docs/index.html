@@ -15,7 +15,28 @@
             <h2>Select Community</h2>
             <div id="communities-list">Loading communities...</div>
         </div>
+
+        <div id="admin-section" class="card" style="display: none;">
+            <h2>Control Panel</h2>
+            <button id="btn-create-community">Create Community</button>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+
+            const userId = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+
+            if (userId) {
+                alert("Success! Your Telegram ID: " + userId);
+            } else {
+                alert("Error: Telegram ID not found. Make sure you open the page via the bot button.");
+            }
+        });
+    </script>
 
     <script type="module" src="./static/js/index.js"></script>
 </body>
