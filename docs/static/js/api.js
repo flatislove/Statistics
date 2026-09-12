@@ -10,6 +10,37 @@ function getTelegramId() {
     return 0;
 }
 
+// Универсальный помощник для выполнения запросов и обработки ошибок
+async function handleRequest(url, options = {}) {
+    let response;
+    try {
+        response = await fetch(url, options);
+    } catch (networkError) {
+        console.error("Network error / Failed to fetch:", networkError);
+        throw new Error("Не удалось подключиться к серверу. Проверьте интернет-соединение.");
+    }
+
+    // Пытаемся прочитать JSON, но защищаемся, если сервер вернул не JSON
+    let data = {};
+    try {
+        data = await response.json();
+    } catch (e) {
+        // Сервер вернул пустой ответ или HTML (например, ошибка 502/504 от прокси)
+    }
+
+    if (!response.ok) {
+        let errorMsg = `Server error: ${response.status} ${response.statusText}`;
+        
+        if (data.detail) {
+            errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : data.detail;
+        }
+        
+        throw new Error(errorMsg);
+    }
+
+    return data;
+}
+
 export async function fetchCommunities() {
     try {
         const response = await fetch(`${API_BASE_URL}/communities`);
@@ -51,7 +82,7 @@ export async function createCommunity(name, inviteCode) {
     const telegramId = getTelegramId();
     console.log("Attempting to create community with Telegram ID:", telegramId);
     
-    const response = await fetch(`${API_BASE_URL}/communities`, {
+    return await handleRequest(`${API_BASE_URL}/communities`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -62,13 +93,6 @@ export async function createCommunity(name, inviteCode) {
             invite_code: inviteCode
         })
     });
-
-    const data = await response.json();
-    if (!response.ok) {
-        const errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : (data.detail || `Server error: ${response.status}`);
-        throw new Error(errorMsg);
-    }
-    return data;
 }
 
 export async function fetchPlayers(communityId) {
@@ -85,7 +109,7 @@ export async function fetchPlayers(communityId) {
 export async function createPlayer(communityId, playerPayload) {
     const telegramId = getTelegramId();
     
-    const response = await fetch(`${API_BASE_URL}/communities/${communityId}/players`, {
+    return await handleRequest(`${API_BASE_URL}/communities/${communityId}/players`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -93,19 +117,12 @@ export async function createPlayer(communityId, playerPayload) {
         },
         body: JSON.stringify(playerPayload)
     });
-
-    const data = await response.json();
-    if (!response.ok) {
-        const errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : (data.detail || `Server error: ${response.status}`);
-        throw new Error(errorMsg);
-    }
-    return data;
 }
 
 export async function updatePlayer(playerId, playerPayload) {
     const telegramId = getTelegramId();
     
-    const response = await fetch(`${API_BASE_URL}/players/${playerId}`, {
+    return await handleRequest(`${API_BASE_URL}/players/${playerId}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -113,29 +130,17 @@ export async function updatePlayer(playerId, playerPayload) {
         },
         body: JSON.stringify(playerPayload)
     });
-
-    const data = await response.json();
-    if (!response.ok) {
-        const errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : (data.detail || `Server error: ${response.status}`);
-        throw new Error(errorMsg);
-    }
-    return data;
 }
 
 export async function deletePlayer(playerId) {
     const telegramId = getTelegramId();
     
-    const response = await fetch(`${API_BASE_URL}/players/${playerId}`, {
+    await handleRequest(`${API_BASE_URL}/players/${playerId}`, {
         method: "DELETE",
         headers: {
             "X-Telegram-Id": telegramId.toString()
         }
     });
 
-    if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        const errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : (data.detail || `Server error: ${response.status}`);
-        throw new Error(errorMsg);
-    }
     return true;
 }
