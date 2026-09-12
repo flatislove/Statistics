@@ -93,8 +93,9 @@ async function loadParticipantsSelection(communityId) {
 
             infoDiv.appendChild(nameSpan);
 
+            let usernameSpan = null;
             if (p.username) {
-                const usernameSpan = document.createElement("span");
+                usernameSpan = document.createElement("span");
                 usernameSpan.textContent = `@${p.username}`;
                 usernameSpan.style.fontSize = "12px";
                 usernameSpan.style.color = "var(--tg-theme-hint-color, #aaaaaa)";
@@ -110,15 +111,15 @@ async function loadParticipantsSelection(communityId) {
             row.appendChild(infoDiv);
             row.appendChild(statusSpan);
 
-row.addEventListener("click", () => {
+            row.addEventListener("click", () => {
                 if (selectedPlayerIds.has(p.id)) {
                     selectedPlayerIds.delete(p.id);
-                    row.style.backgroundColor = "var(--tg-theme-secondary-bg-color, #f8f9fa)";
-                    row.style.borderColor = "var(--tg-theme-hint-color, #ced4da)";
-                    nameSpan.style.color = "var(--tg-theme-text-color, #212529)";
-                    if (usernameSpan) usernameSpan.style.color = "var(--tg-theme-hint-color, #6c757d)";
+                    row.style.backgroundColor = "var(--tg-theme-secondary-bg-color, #2c2c2c)";
+                    row.style.borderColor = "var(--tg-theme-hint-color, #444)";
+                    nameSpan.style.color = "var(--tg-theme-text-color, #ffffff)";
+                    if (usernameSpan) usernameSpan.style.color = "var(--tg-theme-hint-color, #aaaaaa)";
                     statusSpan.textContent = "+";
-                    statusSpan.style.color = "var(--tg-theme-hint-color, #6c757d)";
+                    statusSpan.style.color = "var(--tg-theme-hint-color, #aaaaaa)";
                 } else {
                     selectedPlayerIds.add(p.id);
                     row.style.backgroundColor = "var(--tg-theme-button-color, #2481cc)";
@@ -164,7 +165,8 @@ row.addEventListener("click", () => {
                 alert("Please select at least one player for the game!");
                 return;
             }
-            alert(`Manual setup for ${selectedIdsArray.length} players (Coming next!)`);
+            localStorage.setItem("manual_selected_player_ids", JSON.stringify(selectedIdsArray));
+            window.location.href = "manual_teams.html";
         });
 
         actionsContainer.appendChild(autoBtn);

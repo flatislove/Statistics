@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Teams Setup - Volleyball Statistics</title>
+    <link rel="stylesheet" href="./static/css/style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <button id="btn-back-to-teams">&larr; Back to Selection</button>
+
+        <div class="card" style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 16px; color: var(--tg-theme-text-color, #fff);">Manual Teams Setup</h3>
+                <button id="btn-add-team" style="padding: 6px 12px; background-color: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">+ Add Team</button>
+            </div>
+
+            <!-- Пул нераспределенных выбранных игроков -->
+            <div style="margin-bottom: 15px;">
+                <label style="font-size: 12px; color: var(--tg-theme-hint-color, #aaa); display: block; margin-bottom: 5px;">Unassigned Players (<span id="unassigned-count">0</span>)</label>
+                <div id="unassigned-pool" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 45px; padding: 8px; background: var(--tg-theme-secondary-bg-color, #2c2c2c); border-radius: 6px; border: 1px dashed var(--tg-theme-hint-color, #555);">
+                    <!-- Сюда динамически падают игроки -->
+                </div>
+            </div>
+
+            <!-- Список команд -->
+            <div id="teams-list-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
+                <!-- Карточки команд будут здесь -->
+            </div>
+
+            <button id="btn-save-match" style="width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold;">Save & Start Match</button>
+        </div>
+    </div>
+
+    <script type="module" src="./static/js/manual_teams.js?v=1"></script>
+</body>
+</html>
