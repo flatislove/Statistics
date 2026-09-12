@@ -65,7 +65,8 @@ export async function createCommunity(name, inviteCode) {
 
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(data.detail || `Server error: ${response.status}`);
+        const errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : (data.detail || `Server error: ${response.status}`);
+        throw new Error(errorMsg);
     }
     return data;
 }
@@ -95,7 +96,8 @@ export async function createPlayer(communityId, playerPayload) {
 
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(data.detail || `Server error: ${response.status}`);
+        const errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : (data.detail || `Server error: ${response.status}`);
+        throw new Error(errorMsg);
     }
     return data;
 }
@@ -114,7 +116,8 @@ export async function updatePlayer(playerId, playerPayload) {
 
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(data.detail || `Server error: ${response.status}`);
+        const errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : (data.detail || `Server error: ${response.status}`);
+        throw new Error(errorMsg);
     }
     return data;
 }
@@ -131,7 +134,8 @@ export async function deletePlayer(playerId) {
 
     if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data.detail || `Server error: ${response.status}`);
+        const errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : (data.detail || `Server error: ${response.status}`);
+        throw new Error(errorMsg);
     }
     return true;
 }
