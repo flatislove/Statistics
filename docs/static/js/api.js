@@ -81,7 +81,7 @@ export async function fetchPlayers(communityId) {
     }
 }
 
-export async function createPlayer(communityId, playerName) {
+export async function createPlayer(communityId, playerPayload) {
     const telegramId = getTelegramId();
     
     const response = await fetch(`${API_BASE_URL}/communities/${communityId}/players`, {
@@ -90,9 +90,7 @@ export async function createPlayer(communityId, playerName) {
             "Content-Type": "application/json",
             "X-Telegram-Id": telegramId.toString()
         },
-        body: JSON.stringify({
-            name: playerName
-        })
+        body: JSON.stringify(playerPayload)
     });
 
     const data = await response.json();
@@ -100,4 +98,40 @@ export async function createPlayer(communityId, playerName) {
         throw new Error(data.detail || `Server error: ${response.status}`);
     }
     return data;
+}
+
+export async function updatePlayer(playerId, playerPayload) {
+    const telegramId = getTelegramId();
+    
+    const response = await fetch(`${API_BASE_URL}/players/${playerId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Id": telegramId.toString()
+        },
+        body: JSON.stringify(playerPayload)
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.detail || `Server error: ${response.status}`);
+    }
+    return data;
+}
+
+export async function deletePlayer(playerId) {
+    const telegramId = getTelegramId();
+    
+    const response = await fetch(`${API_BASE_URL}/players/${playerId}`, {
+        method: "DELETE",
+        headers: {
+            "X-Telegram-Id": telegramId.toString()
+        }
+    });
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.detail || `Server error: ${response.status}`);
+    }
+    return true;
 }
