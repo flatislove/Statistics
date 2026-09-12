@@ -45,6 +45,7 @@ async function loadParticipantsSelection(communityId) {
             return;
         }
 
+        // Сортировка по алфавиту по имени
         players.sort((a, b) => {
             const nameA = (a.name || a.first_name || "").trim();
             const nameB = (b.name || b.first_name || "").trim();
@@ -84,8 +85,9 @@ async function loadParticipantsSelection(communityId) {
             const playerName = p.name || p.first_name || "Unnamed";
             const nameSpan = document.createElement("span");
             nameSpan.textContent = `${playerName} (${p.gender || 'M'})`;
-            nameSpan.style.fontWeight = "500";
+            nameSpan.style.fontWeight = "600";
             nameSpan.style.fontSize = "14px";
+            nameSpan.style.color = "#212529"; // Явный темный цвет текста
 
             infoDiv.appendChild(nameSpan);
 
@@ -93,11 +95,10 @@ async function loadParticipantsSelection(communityId) {
                 const usernameSpan = document.createElement("span");
                 usernameSpan.textContent = `@${p.username}`;
                 usernameSpan.style.fontSize = "12px";
-                usernameSpan.style.color = "#666";
+                usernameSpan.style.color = "#6c757d"; // Серый цвет для юзернейма
                 infoDiv.appendChild(usernameSpan);
             }
 
-            // Индикатор статуса (например, галочка или текст)
             const statusSpan = document.createElement("span");
             statusSpan.textContent = "+";
             statusSpan.style.fontSize = "16px";
@@ -113,12 +114,14 @@ async function loadParticipantsSelection(communityId) {
                     selectedPlayerIds.delete(p.id);
                     row.style.backgroundColor = "#f8f9fa";
                     row.style.borderColor = "#e9ecef";
+                    nameSpan.style.color = "#212529";
                     statusSpan.textContent = "+";
                     statusSpan.style.color = "#6c757d";
                 } else {
                     selectedPlayerIds.add(p.id);
                     row.style.backgroundColor = "#d1e7dd"; 
                     row.style.borderColor = "#badbcc";
+                    nameSpan.style.color = "#0f5132"; // Темно-зеленый текст при выборе
                     statusSpan.textContent = "✓";
                     statusSpan.style.color = "#0f5132";
                 }
