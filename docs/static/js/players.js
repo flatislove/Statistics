@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             const payload = {
+                community_id: Number(communityId),
                 name: playerName,
                 nickname: nicknameInput ? nicknameInput.value.trim() || null : null,
                 telegram_id: telegramIdInput && telegramIdInput.value.trim() ? Number(telegramIdInput.value.trim()) : null,
@@ -57,13 +58,15 @@ async function loadPlayersList(communityId) {
     listContainer.innerHTML = "Loading players...";
 
     try {
-        const players = await fetchPlayers(communityId);
+        let players = await fetchPlayers(communityId);
         listContainer.innerHTML = "";
 
         if (!players || players.length === 0) {
             listContainer.innerHTML = "<p>No players found.</p>";
             return;
         }
+
+        players.sort((a, b) => a.name.localeCompare(b.name));
 
         const ul = document.createElement("ul");
         ul.style.listStyle = "none";
@@ -150,6 +153,6 @@ async function loadPlayersList(communityId) {
 
         listContainer.appendChild(ul);
     } catch (error) {
-        listContainer.innerHTML = "<p>Failed to load players.</p>";
+        listContainer.innerHTML = "<p>No players found.</p>";
     }
 }
