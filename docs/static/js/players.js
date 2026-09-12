@@ -12,13 +12,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    const backBtn = document.getElementById("btn-back-to-settings");
-    if (backBtn) {
-        backBtn.addEventListener("click", () => {
-            window.location.href = "settings.html";
-        });
-    }
-
     await loadPlayersList(Number(communityId));
 
     const addBtn = document.getElementById("btn-add-player");
@@ -82,6 +75,7 @@ async function loadPlayersList(communityId) {
             const editBtn = document.createElement("button");
             editBtn.textContent = "Edit";
             editBtn.style.padding = "4px 8px";
+            editBtn.style.cursor = "pointer";
             editBtn.addEventListener("click", async () => {
                 const newName = prompt("Edit player name:", p.name);
                 if (!newName || !newName.trim()) return;
@@ -100,6 +94,8 @@ async function loadPlayersList(communityId) {
             deleteBtn.style.backgroundColor = "#dc3545";
             deleteBtn.style.color = "white";
             deleteBtn.style.border = "none";
+            deleteBtn.style.borderRadius = "4px";
+            deleteBtn.style.cursor = "pointer";
             deleteBtn.addEventListener("click", async () => {
                 if (!confirm(`Are you sure you want to delete ${p.name}?`)) return;
 
