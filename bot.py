@@ -35,9 +35,15 @@ class CommunityCreate(BaseModel):
 
 class PlayerCreate(BaseModel):
     name: str
+    nickname: str | None = None
+    telegram_id: int | None = None
+    gender: str = "M"
 
 class PlayerUpdate(BaseModel):
-    name: str
+    name: str | None = None
+    nickname: str | None = None
+    telegram_id: int | None = None
+    gender: str | None = None
 
 async def get_db():
     async with async_session() as session:
@@ -87,7 +93,16 @@ async def get_players(community_id: int, db: AsyncSession = Depends(get_db)):
     
     result = await db.execute(select(Player).where(Player.community_id == community_id))
     players = result.scalars().all()
-    return [{"id": p.id, "name": p.name} for p in players]
+    return [
+        {
+            "id": p.id,
+            "name": p.name,
+            "nickname": getattr(p, "nickname", None),
+            "telegram_id": getattr(p, "telegram_id", None),
+            "gender": getattr(p, "gender", "M")
+        } 
+        for p in players
+    ]
 
 @app.post("/api/communities/{community_id}/players")
 async def create_player(
@@ -108,12 +123,25 @@ async def create_player(
     if not comm:
         raise HTTPException(status_code=404, detail="Community not found.")
 
-    new_player = Player(name=data.name, community_id=community_id)
+    new_player = Player(
+        name=data.name,
+        nickname=data.nickname,
+        telegram_id=data.telegram_id,
+        gender=data.gender,
+        community_id=community_id
+    )
     db.add(new_player)
     await db.commit()
     await db.refresh(new_player)
     
-    return {"status": "success", "player_id": new_player.id, "name": new_player.name}
+    return {
+        "status": "success",
+        "player_id": new_player.id,
+        "name": new_player.name,
+        "nickname": new_player.nickname,
+        "telegram_id": new_player.telegram_id,
+        "gender": new_player.gender
+    }
 
 @app.put("/api/players/{player_id}")
 async def update_player(
@@ -134,11 +162,26 @@ async def update_player(
     if not player:
         raise HTTPException(status_code=404, detail="Player not found.")
 
-    player.name = data.name
+    if data.name is not None:
+        player.name = data.name
+    if data.nickname is not None:
+        player.nickname = data.nickname
+    if data.telegram_id is not None:
+        player.telegram_id = data.telegram_id
+    if data.gender is not None:
+        player.gender = data.gender
+
     await db.commit()
     await db.refresh(player)
     
-    return {"status": "success", "player_id": player.id, "name": player.name}
+    return {
+        "status": "success",
+        "player_id": player.id,
+        "name": player.name,
+        "nickname": player.nickname,
+        "telegram_id": player.telegram_id,
+        "gender": player.gender
+    }
 
 @app.delete("/api/players/{player_id}")
 async def delete_player(

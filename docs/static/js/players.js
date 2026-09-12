@@ -27,28 +27,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     addBtn.addEventListener("click", async () => {
         console.log("Add player button clicked!");
 
-        const nameInput = document.getElementById("input-player-name");
-        const nicknameInput = document.getElementById("input-player-nickname");
+        const firstNameInput = document.getElementById("input-player-first-name");
+        const usernameInput = document.getElementById("input-player-username");
         const telegramIdInput = document.getElementById("input-player-telegram-id");
         const genderSelect = document.getElementById("select-player-gender");
 
-        if (!nameInput) {
-            console.error("Name input element not found!");
+        if (!firstNameInput) {
+            console.error("First name input element not found!");
             return;
         }
         
-        const playerName = nameInput.value.trim();
-        console.log("Player name entered:", playerName);
+        const firstName = firstNameInput.value.trim();
+        console.log("Player first name entered:", firstName);
 
-        if (!playerName) {
-            alert("Player name is required");
+        if (!firstName) {
+            alert("Player first name is required");
             return;
         }
 
+        // Ключи payload строго соответствуют модели Player и PlayerCreate в bot.py
         const payload = {
-            community_id: Number(communityId),
-            name: playerName,
-            nickname: nicknameInput ? nicknameInput.value.trim() || null : null,
+            first_name: firstName,
+            username: usernameInput ? usernameInput.value.trim().replace(/^@/, '') || null : null,
             telegram_id: telegramIdInput && telegramIdInput.value.trim() ? Number(telegramIdInput.value.trim()) : null,
             gender: genderSelect ? genderSelect.value : "M"
         };
@@ -59,8 +59,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const result = await createPlayer(Number(communityId), payload);
             console.log("Player successfully created:", result);
 
-            nameInput.value = "";
-            if (nicknameInput) nicknameInput.value = "";
+            firstNameInput.value = "";
+            if (usernameInput) usernameInput.value = "";
             if (telegramIdInput) telegramIdInput.value = "";
             
             await loadPlayersList(Number(communityId));
@@ -88,7 +88,7 @@ async function loadPlayersList(communityId) {
             return;
         }
 
-        players.sort((a, b) => a.name.localeCompare(b.name));
+        players.sort((a, b) => a.first_name.localeCompare(b.first_name));
 
         const ul = document.createElement("ul");
         ul.style.listStyle = "none";
@@ -112,12 +112,12 @@ async function loadPlayersList(communityId) {
             infoDiv.style.gap = "2px";
 
             const nameSpan = document.createElement("span");
-            nameSpan.textContent = p.name;
+            nameSpan.textContent = p.first_name;
             nameSpan.style.fontWeight = "bold";
 
             const detailsSpan = document.createElement("span");
             let detailsText = `Gender: ${p.gender || 'M'}`;
-            if (p.nickname) detailsText += ` | @${p.nickname}`;
+            if (p.username) detailsText += ` | @${p.username}`;
             if (p.telegram_id) detailsText += ` | ID: ${p.telegram_id}`;
             detailsSpan.textContent = detailsText;
             detailsSpan.style.fontSize = "12px";
@@ -135,11 +135,11 @@ async function loadPlayersList(communityId) {
             editBtn.style.padding = "6px 10px";
             editBtn.style.cursor = "pointer";
             editBtn.addEventListener("click", async () => {
-                const newName = prompt("Edit player name:", p.name);
-                if (!newName || !newName.trim()) return;
+                const newFirstName = prompt("Edit player first name:", p.first_name);
+                if (!newFirstName || !newFirstName.trim()) return;
 
                 try {
-                    await updatePlayer(p.id, { name: newName.trim() });
+                    await updatePlayer(p.id, { first_name: newFirstName.trim() });
                     await loadPlayersList(communityId);
                 } catch (error) {
                     alert("Error: " + error.message);
@@ -155,7 +155,7 @@ async function loadPlayersList(communityId) {
             deleteBtn.style.borderRadius = "4px";
             deleteBtn.style.cursor = "pointer";
             deleteBtn.addEventListener("click", async () => {
-                if (!confirm(`Are you sure you want to delete ${p.name}?`)) return;
+                if (!confirm(`Are you sure you want to delete ${p.first_name}?`)) return;
 
                 try {
                     await deletePlayer(p.id);
