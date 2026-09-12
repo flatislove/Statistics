@@ -17,15 +17,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     const addBtn = document.getElementById("btn-add-player");
     if (addBtn) {
         addBtn.addEventListener("click", async () => {
-            const input = document.getElementById("input-player-name");
-            if (!input) return;
+            const nameInput = document.getElementById("input-player-name");
+            const nicknameInput = document.getElementById("input-player-nickname");
+            const telegramIdInput = document.getElementById("input-player-telegram-id");
+            const genderSelect = document.getElementById("select-player-gender");
+
+            if (!nameInput) return;
             
-            const playerName = input.value.trim();
-            if (!playerName) return;
+            const playerName = nameInput.value.trim();
+            if (!playerName) {
+                alert("Player name is required");
+                return;
+            }
+
+            const payload = {
+                name: playerName,
+                nickname: nicknameInput ? nicknameInput.value.trim() || null : null,
+                telegram_id: telegramIdInput && telegramIdInput.value.trim() ? Number(telegramIdInput.value.trim()) : null,
+                gender: genderSelect ? genderSelect.value : "M"
+            };
 
             try {
-                await createPlayer(Number(communityId), playerName);
-                input.value = "";
+                await createPlayer(Number(communityId), payload);
+                nameInput.value = "";
+                if (nicknameInput) nicknameInput.value = "";
+                if (telegramIdInput) telegramIdInput.value = "";
                 await loadPlayersList(Number(communityId));
             } catch (error) {
                 alert("Error: " + error.message);
@@ -61,12 +77,29 @@ async function loadPlayersList(communityId) {
             li.style.display = "flex";
             li.style.justifyContent = "space-between";
             li.style.alignItems = "center";
-            li.style.padding = "8px";
+            li.style.padding = "10px";
             li.style.border = "1px solid #ddd";
-            li.style.borderRadius = "4px";
+            li.style.borderRadius = "6px";
+
+            const infoDiv = document.createElement("div");
+            infoDiv.style.display = "flex";
+            infoDiv.style.flexDirection = "column";
+            infoDiv.style.gap = "2px";
 
             const nameSpan = document.createElement("span");
             nameSpan.textContent = p.name;
+            nameSpan.style.fontWeight = "bold";
+
+            const detailsSpan = document.createElement("span");
+            let detailsText = `Gender: ${p.gender || 'M'}`;
+            if (p.nickname) detailsText += ` | @${p.nickname}`;
+            if (p.telegram_id) detailsText += ` | ID: ${p.telegram_id}`;
+            detailsSpan.textContent = detailsText;
+            detailsSpan.style.fontSize = "12px";
+            detailsSpan.style.color = "#666";
+
+            infoDiv.appendChild(nameSpan);
+            infoDiv.appendChild(detailsSpan);
 
             const actionsDiv = document.createElement("div");
             actionsDiv.style.display = "flex";
@@ -74,14 +107,14 @@ async function loadPlayersList(communityId) {
 
             const editBtn = document.createElement("button");
             editBtn.textContent = "Edit";
-            editBtn.style.padding = "4px 8px";
+            editBtn.style.padding = "6px 10px";
             editBtn.style.cursor = "pointer";
             editBtn.addEventListener("click", async () => {
                 const newName = prompt("Edit player name:", p.name);
                 if (!newName || !newName.trim()) return;
 
                 try {
-                    await updatePlayer(p.id, newName.trim());
+                    await updatePlayer(p.id, { name: newName.trim() });
                     await loadPlayersList(communityId);
                 } catch (error) {
                     alert("Error: " + error.message);
@@ -90,7 +123,7 @@ async function loadPlayersList(communityId) {
 
             const deleteBtn = document.createElement("button");
             deleteBtn.textContent = "Delete";
-            deleteBtn.style.padding = "4px 8px";
+            deleteBtn.style.padding = "6px 10px";
             deleteBtn.style.backgroundColor = "#dc3545";
             deleteBtn.style.color = "white";
             deleteBtn.style.border = "none";
@@ -110,7 +143,7 @@ async function loadPlayersList(communityId) {
             actionsDiv.appendChild(editBtn);
             actionsDiv.appendChild(deleteBtn);
 
-            li.appendChild(nameSpan);
+            li.appendChild(infoDiv);
             li.appendChild(actionsDiv);
             ul.appendChild(li);
         });
