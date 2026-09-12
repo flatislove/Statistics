@@ -1,16 +1,12 @@
 import { fetchPlayers, createPlayer, updatePlayer, deletePlayer } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("Players DOM loaded successfully");
-
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
     }
 
     const communityId = localStorage.getItem("selected_community_id");
-    console.log("Selected Community ID from storage:", communityId);
-
     if (!communityId) {
         window.location.href = "index.html";
         return;
@@ -20,44 +16,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const addBtn = document.getElementById("btn-add-player");
     if (!addBtn) {
-        console.error("Button element 'btn-add-player' not found!");
+        alert("Критическая ошибка: кнопка 'btn-add-player' не найдена в HTML!");
         return;
     }
 
     addBtn.addEventListener("click", async () => {
-        console.log("Add player button clicked!");
+        // Шаг 1: Проверяем, что клик по кнопке сработал
+        // alert("Кнопка нажата!"); 
 
-        const firstNameInput = document.getElementById("input-player-first-name");
+        const firstNameInput = 
+            document.getElementById("input-player-first-name") || 
+            document.getElementById("player-name") || 
+            document.getElementById("name-input");
+
         const usernameInput = document.getElementById("input-player-username");
         const telegramIdInput = document.getElementById("input-player-telegram-id");
         const genderSelect = document.getElementById("select-player-gender");
 
         if (!firstNameInput) {
-            console.error("First name input element not found!");
+            alert("Ошибка: поле ввода имени (input) не найдено в HTML!");
             return;
         }
         
-        const firstName = firstNameInput.value.trim();
-        console.log("Player name entered:", firstName);
+        const playerName = firstNameInput.value.trim();
 
-        if (!firstName) {
-            alert("Player name is required");
+        if (!playerName) {
+            alert("Пожалуйста, введите имя игрока!");
             return;
         }
 
         const payload = {
-            name: firstName,
-            first_name: firstName,
-            username: usernameInput ? usernameInput.value.trim().replace(/^@/, '') || null : null,
+            name: playerName,
+            first_name: playerName,
+            username: usernameInput && usernameInput.value.trim() ? usernameInput.value.trim().replace(/^@/, '') : null,
             telegram_id: telegramIdInput && telegramIdInput.value.trim() ? Number(telegramIdInput.value.trim()) : null,
             gender: genderSelect ? genderSelect.value : "M"
         };
 
-        console.log("Sending payload to createPlayer:", payload);
-
         try {
             const result = await createPlayer(Number(communityId), payload);
-            console.log("Player successfully created:", result);
+            
+            // Если дошли сюда, значит игрок успешно создался на сервере!
+            alert("Игрок успешно добавлен!");
 
             firstNameInput.value = "";
             if (usernameInput) usernameInput.value = "";
@@ -65,8 +65,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             await loadPlayersList(Number(communityId));
         } catch (error) {
-            console.error("Failed to create player:", error);
-            alert("Error: " + error.message);
+            // Если сервер вернул ошибку, десктопное приложение покажет её в окне
+            alert("Ошибка от сервера: " + error.message);
         }
     });
 });
@@ -79,7 +79,6 @@ async function loadPlayersList(communityId) {
 
     try {
         let players = await fetchPlayers(communityId);
-        console.log("Fetched players list:", players);
         
         listContainer.innerHTML = "";
 
@@ -183,7 +182,6 @@ async function loadPlayersList(communityId) {
 
         listContainer.appendChild(ul);
     } catch (error) {
-        console.error("Error loading players list:", error);
         listContainer.innerHTML = "<p>No players found.</p>";
     }
 }
