@@ -1,12 +1,16 @@
 import { fetchPlayers, createPlayer, updatePlayer, deletePlayer } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
+    console.log("Players DOM loaded successfully");
+
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
     }
 
     const communityId = localStorage.getItem("selected_community_id");
+    console.log("Selected Community ID from storage:", communityId);
+
     if (!communityId) {
         window.location.href = "index.html";
         return;
@@ -15,40 +19,56 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadPlayersList(Number(communityId));
 
     const addBtn = document.getElementById("btn-add-player");
-    if (addBtn) {
-        addBtn.addEventListener("click", async () => {
-            const nameInput = document.getElementById("input-player-name");
-            const nicknameInput = document.getElementById("input-player-nickname");
-            const telegramIdInput = document.getElementById("input-player-telegram-id");
-            const genderSelect = document.getElementById("select-player-gender");
-
-            if (!nameInput) return;
-            
-            const playerName = nameInput.value.trim();
-            if (!playerName) {
-                alert("Player name is required");
-                return;
-            }
-
-            const payload = {
-                community_id: Number(communityId),
-                name: playerName,
-                nickname: nicknameInput ? nicknameInput.value.trim() || null : null,
-                telegram_id: telegramIdInput && telegramIdInput.value.trim() ? Number(telegramIdInput.value.trim()) : null,
-                gender: genderSelect ? genderSelect.value : "M"
-            };
-
-            try {
-                await createPlayer(Number(communityId), payload);
-                nameInput.value = "";
-                if (nicknameInput) nicknameInput.value = "";
-                if (telegramIdInput) telegramIdInput.value = "";
-                await loadPlayersList(Number(communityId));
-            } catch (error) {
-                alert("Error: " + error.message);
-            }
-        });
+    if (!addBtn) {
+        console.error("Button element 'btn-add-player' not found!");
+        return;
     }
+
+    addBtn.addEventListener("click", async () => {
+        console.log("Add player button clicked!");
+
+        const nameInput = document.getElementById("input-player-name");
+        const nicknameInput = document.getElementById("input-player-nickname");
+        const telegramIdInput = document.getElementById("input-player-telegram-id");
+        const genderSelect = document.getElementById("select-player-gender");
+
+        if (!nameInput) {
+            console.error("Name input element not found!");
+            return;
+        }
+        
+        const playerName = nameInput.value.trim();
+        console.log("Player name entered:", playerName);
+
+        if (!playerName) {
+            alert("Player name is required");
+            return;
+        }
+
+        const payload = {
+            community_id: Number(communityId),
+            name: playerName,
+            nickname: nicknameInput ? nicknameInput.value.trim() || null : null,
+            telegram_id: telegramIdInput && telegramIdInput.value.trim() ? Number(telegramIdInput.value.trim()) : null,
+            gender: genderSelect ? genderSelect.value : "M"
+        };
+
+        console.log("Sending payload to createPlayer:", payload);
+
+        try {
+            const result = await createPlayer(Number(communityId), payload);
+            console.log("Player successfully created:", result);
+
+            nameInput.value = "";
+            if (nicknameInput) nicknameInput.value = "";
+            if (telegramIdInput) telegramIdInput.value = "";
+            
+            await loadPlayersList(Number(communityId));
+        } catch (error) {
+            console.error("Failed to create player:", error);
+            alert("Error: " + error.message);
+        }
+    });
 });
 
 async function loadPlayersList(communityId) {
@@ -59,6 +79,8 @@ async function loadPlayersList(communityId) {
 
     try {
         let players = await fetchPlayers(communityId);
+        console.log("Fetched players list:", players);
+        
         listContainer.innerHTML = "";
 
         if (!players || players.length === 0) {
@@ -153,6 +175,7 @@ async function loadPlayersList(communityId) {
 
         listContainer.appendChild(ul);
     } catch (error) {
+        console.error("Error loading players list:", error);
         listContainer.innerHTML = "<p>No players found.</p>";
     }
 }
