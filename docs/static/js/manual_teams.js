@@ -95,17 +95,32 @@ function renderUI() {
         const titleInput = document.createElement("input");
         titleInput.type = "text";
         titleInput.value = team.name;
-        titleInput.style.cssText = "background: transparent; border: none; color: var(--tg-theme-text-color, #fff); font-weight: bold; font-size: 14px; width: 120px;";
+        titleInput.style.cssText = "background: transparent; border: none; color: var(--tg-theme-text-color, #fff); font-weight: bold; font-size: 14px; width: 100px;";
         titleInput.addEventListener("input", (e) => {
             team.name = e.target.value;
         });
+
+        const rightHeaderWrapper = document.createElement("div");
+        rightHeaderWrapper.style.cssText = "display: flex; align-items: center; gap: 8px;";
 
         const teamInfo = document.createElement("span");
         teamInfo.style.cssText = "font-size: 12px; color: var(--tg-theme-hint-color, #aaa);";
         teamInfo.textContent = `${team.playerIds.length} players`;
 
+        // Кнопка удаления команды
+        const removeTeamBtn = document.createElement("button");
+        removeTeamBtn.textContent = "✕";
+        removeTeamBtn.style.cssText = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 14px; font-weight: bold; padding: 0 4px;";
+        removeTeamBtn.addEventListener("click", () => {
+            teams = teams.filter(t => t.id !== team.id);
+            renderUI();
+        });
+
+        rightHeaderWrapper.appendChild(teamInfo);
+        rightHeaderWrapper.appendChild(removeTeamBtn);
+
         teamHeader.appendChild(titleInput);
-        teamHeader.appendChild(teamInfo);
+        teamHeader.appendChild(rightHeaderWrapper);
         teamCard.appendChild(teamHeader);
 
         const teamPlayersList = document.createElement("div");
@@ -119,14 +134,15 @@ function renderUI() {
                 if (!pObj) return;
 
                 const pRow = document.createElement("div");
-                pRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: var(--tg-theme-bg-color, #181818); padding: 3px 6px; border-radius: 4px; font-size: 12px; color: var(--tg-theme-text-color, #fff); height: 26px;";
+                pRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: var(--tg-theme-bg-color, #181818); padding: 3px 8px; border-radius: 4px; font-size: 12px; color: var(--tg-theme-text-color, #fff); height: 26px;";
                 
                 const pNameSpan = document.createElement("span");
-                pNameSpan.textContent = `${pObj.name || pObj.first_name} (${pObj.gender || 'M'})`;
+                const playerName = pObj.name || pObj.first_name || "Player";
+                pNameSpan.textContent = `${playerName} (${pObj.gender || 'M'})`;
 
                 const removeBtn = document.createElement("button");
                 removeBtn.textContent = "✕";
-                removeBtn.style.cssText = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 13px; font-weight: bold; padding: 0 4px; margin-left: auto;";
+                removeBtn.style.cssText = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 13px; font-weight: bold; padding: 0; margin-left: auto;";
                 removeBtn.addEventListener("click", () => {
                     team.playerIds = team.playerIds.filter(id => id !== playerId);
                     renderUI();
