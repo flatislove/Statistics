@@ -181,7 +181,6 @@ async function loadPlayersList(communityId) {
             editBtn.style.padding = "6px 10px";
             editBtn.style.cursor = "pointer";
             editBtn.addEventListener("click", () => {
-                alert("Клик по Edit сработал!"); // Диагностика
                 const editModal = document.getElementById("edit-player-modal");
                 if (!editModal) {
                     alert("Ошибка: #edit-player-modal не найден в HTML!");
