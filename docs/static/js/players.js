@@ -21,11 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     addBtn.addEventListener("click", async () => {
-        const firstNameInput = 
-            document.getElementById("input-player-first-name") || 
-            document.getElementById("player-name") || 
-            document.getElementById("name-input");
-
+        const firstNameInput = document.getElementById("input-player-first-name");
         const usernameInput = document.getElementById("input-player-username");
         const telegramIdInput = document.getElementById("input-player-telegram-id");
         const genderSelect = document.getElementById("select-player-gender");
@@ -64,6 +60,49 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Server error: " + error.message);
         }
     });
+
+    const saveEditBtn = document.getElementById("btn-save-player");
+    if (saveEditBtn) {
+        saveEditBtn.addEventListener("click", async () => {
+            const id = document.getElementById("edit-player-id").value;
+            const firstNameInput = document.getElementById("input-edit-player-first-name");
+            const usernameInput = document.getElementById("input-edit-player-username");
+            const telegramIdInput = document.getElementById("input-edit-player-telegram-id");
+            const genderSelect = document.getElementById("select-edit-player-gender");
+
+            if (!firstNameInput) return;
+
+            const playerName = firstNameInput.value.trim();
+            if (!playerName) {
+                alert("Please enter a player name!");
+                return;
+            }
+
+            const payload = {
+                name: playerName,
+                first_name: playerName,
+                username: usernameInput && usernameInput.value.trim() ? usernameInput.value.trim().replace(/^@/, '') : null,
+                telegram_id: telegramIdInput && telegramIdInput.value.trim() ? Number(telegramIdInput.value.trim()) : null,
+                gender: genderSelect ? genderSelect.value : "M"
+            };
+
+            try {
+                await updatePlayer(Number(id), payload);
+                alert("Player successfully updated!");
+                document.getElementById("edit-player-card").style.display = "none";
+                await loadPlayersList(Number(communityId));
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        });
+    }
+
+    const cancelEditBtn = document.getElementById("btn-cancel-edit");
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener("click", () => {
+            document.getElementById("edit-player-card").style.display = "none";
+        });
+    }
 });
 
 async function loadPlayersList(communityId) {
@@ -133,18 +172,17 @@ async function loadPlayersList(communityId) {
             editBtn.textContent = "Edit";
             editBtn.style.padding = "6px 10px";
             editBtn.style.cursor = "pointer";
-            editBtn.addEventListener("click", async () => {
-                const newFirstName = prompt("Edit player name:", playerName);
-                if (!newFirstName || !newFirstName.trim()) return;
-
-                try {
-                    await updatePlayer(p.id, { 
-                        name: newFirstName.trim(),
-                        first_name: newFirstName.trim()
-                    });
-                    await loadPlayersList(communityId);
-                } catch (error) {
-                    alert("Error: " + error.message);
+            editBtn.addEventListener("click", () => {
+                const editCard = document.getElementById("edit-player-card");
+                if (editCard) {
+                    editCard.style.display = "block";
+                    document.getElementById("edit-player-id").value = p.id;
+                    document.getElementById("input-edit-player-first-name").value = playerName;
+                    document.getElementById("input-edit-player-username").value = p.username || "";
+                    document.getElementById("input-edit-player-telegram-id").value = p.telegram_id || "";
+                    document.getElementById("select-edit-player-gender").value = p.gender || "M";
+                    
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
 

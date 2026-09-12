@@ -27,6 +27,24 @@
             </div>
         </div>
 
+        <div class="card" id="edit-player-card" style="display: none; background-color: #f9f9f9; border: 2px dashed #007bff;">
+            <h2>Edit Player</h2>
+            <input type="hidden" id="edit-player-id">
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
+                <input type="text" id="input-edit-player-first-name" placeholder="Player first name" style="width: 100%; padding: 12px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px;">
+                <input type="text" id="input-edit-player-username" placeholder="Telegram username (optional)" style="width: 100%; padding: 12px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px;">
+                <input type="number" id="input-edit-player-telegram-id" placeholder="Telegram ID (optional)" style="width: 100%; padding: 12px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px;">
+                <select id="select-edit-player-gender" style="width: 100%; padding: 12px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; background-color: white; color: black;">
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                </select>
+                <div style="display: flex; gap: 10px;">
+                    <button id="btn-save-player" style="flex: 1; padding: 12px; cursor: pointer; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 6px;">Save Changes</button>
+                    <button id="btn-cancel-edit" style="padding: 12px; cursor: pointer; font-size: 16px; background-color: #6c757d; color: white; border: none; border-radius: 6px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <h2>Edit & Delete Players</h2>
             <div id="players-list">Loading players...</div>
