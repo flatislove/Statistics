@@ -1,8 +1,8 @@
 const API_BASE_URL = "https://statistics-x1d4.onrender.com/api";
 
 function getTelegramId() {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-        const userId = window.Telegram.WebApp.initDataUnsafe.user?.id || 0;
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        const userId = window.Telegram.WebApp.initDataUnsafe.user.id;
         console.log("Telegram ID detected:", userId);
         return userId;
     }
@@ -10,31 +10,26 @@ function getTelegramId() {
     return 0;
 }
 
-// Универсальный помощник для выполнения запросов и обработки ошибок
 async function handleRequest(url, options = {}) {
     let response;
     try {
         response = await fetch(url, options);
     } catch (networkError) {
         console.error("Network error / Failed to fetch:", networkError);
-        throw new Error("Не удалось подключиться к серверу. Проверьте интернет-соединение.");
+        throw new Error("Failed to connect to the server. Check your internet connection.");
     }
 
-    // Пытаемся прочитать JSON, но защищаемся, если сервер вернул не JSON
     let data = {};
     try {
         data = await response.json();
     } catch (e) {
-        // Сервер вернул пустой ответ или HTML (например, ошибка 502/504 от прокси)
     }
 
     if (!response.ok) {
         let errorMsg = `Server error: ${response.status} ${response.statusText}`;
-        
         if (data.detail) {
             errorMsg = typeof data.detail === "object" ? JSON.stringify(data.detail) : data.detail;
         }
-        
         throw new Error(errorMsg);
     }
 
@@ -66,11 +61,8 @@ export async function checkAdminStatus() {
             }
         });
         
-        console.log("Check-admin response status:", response.status);
         if (!response.ok) return false;
-        
         const data = await response.json();
-        console.log("Admin check result data:", data);
         return data.is_admin;
     } catch (error) {
         console.error("Error in checkAdminStatus:", error);
@@ -80,8 +72,6 @@ export async function checkAdminStatus() {
 
 export async function createCommunity(name, inviteCode) {
     const telegramId = getTelegramId();
-    console.log("Attempting to create community with Telegram ID:", telegramId);
-    
     return await handleRequest(`${API_BASE_URL}/communities`, {
         method: "POST",
         headers: {
@@ -108,7 +98,6 @@ export async function fetchPlayers(communityId) {
 
 export async function createPlayer(communityId, playerPayload) {
     const telegramId = getTelegramId();
-    
     return await handleRequest(`${API_BASE_URL}/communities/${communityId}/players`, {
         method: "POST",
         headers: {
@@ -121,7 +110,6 @@ export async function createPlayer(communityId, playerPayload) {
 
 export async function updatePlayer(playerId, playerPayload) {
     const telegramId = getTelegramId();
-    
     return await handleRequest(`${API_BASE_URL}/players/${playerId}`, {
         method: "PUT",
         headers: {
@@ -134,13 +122,69 @@ export async function updatePlayer(playerId, playerPayload) {
 
 export async function deletePlayer(playerId) {
     const telegramId = getTelegramId();
-    
     await handleRequest(`${API_BASE_URL}/players/${playerId}`, {
         method: "DELETE",
         headers: {
             "X-Telegram-Id": telegramId.toString()
         }
     });
-
     return true;
+}
+
+export async function fetchMatchDays(communityId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/communities/${communityId}/match-days`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Error in fetchMatchDays:", error);
+        return [];
+    }
+}
+
+export async function createMatchDay(communityId, payload) {
+    const telegramId = getTelegramId();
+    return await handleRequest(`${API_BASE_URL}/communities/${communityId}/match-days`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Id": telegramId.toString()
+        },
+        body: JSON.stringify(payload)
+    });
+}
+
+export async function fetchMatchDayDetails(matchDayId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/match-days/${matchDayId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Error in fetchMatchDayDetails:", error);
+        return null;
+    }
+}
+
+export async function createGame(matchDayId, payload) {
+    const telegramId = getTelegramId();
+    return await handleRequest(`${API_BASE_URL}/match-days/${matchDayId}/games`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Id": telegramId.toString()
+        },
+        body: JSON.stringify(payload)
+    });
+}
+
+export async function updateGameStats(gameId, payload) {
+    const telegramId = getTelegramId();
+    return await handleRequest(`${API_BASE_URL}/games/${gameId}/stats`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Id": telegramId.toString()
+        },
+        body: JSON.stringify(payload)
+    });
 }

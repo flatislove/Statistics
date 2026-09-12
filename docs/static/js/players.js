@@ -16,14 +16,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const addBtn = document.getElementById("btn-add-player");
     if (!addBtn) {
-        alert("Критическая ошибка: кнопка 'btn-add-player' не найдена в HTML!");
+        alert("Critical error: button 'btn-add-player' not found in HTML!");
         return;
     }
 
     addBtn.addEventListener("click", async () => {
-        // Шаг 1: Проверяем, что клик по кнопке сработал
-        // alert("Кнопка нажата!"); 
-
         const firstNameInput = 
             document.getElementById("input-player-first-name") || 
             document.getElementById("player-name") || 
@@ -34,14 +31,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         const genderSelect = document.getElementById("select-player-gender");
 
         if (!firstNameInput) {
-            alert("Ошибка: поле ввода имени (input) не найдено в HTML!");
+            alert("Error: input field for player name not found in HTML!");
             return;
         }
         
         const playerName = firstNameInput.value.trim();
 
         if (!playerName) {
-            alert("Пожалуйста, введите имя игрока!");
+            alert("Please enter a player name!");
             return;
         }
 
@@ -54,10 +51,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
 
         try {
-            const result = await createPlayer(Number(communityId), payload);
+            await createPlayer(Number(communityId), payload);
             
-            // Если дошли сюда, значит игрок успешно создался на сервере!
-            alert("Игрок успешно добавлен!");
+            alert("Player successfully added!");
 
             firstNameInput.value = "";
             if (usernameInput) usernameInput.value = "";
@@ -65,8 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             await loadPlayersList(Number(communityId));
         } catch (error) {
-            // Если сервер вернул ошибку, десктопное приложение покажет её в окне
-            alert("Ошибка от сервера: " + error.message);
+            alert("Server error: " + error.message);
         }
     });
 });
