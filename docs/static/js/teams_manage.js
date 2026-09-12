@@ -14,12 +14,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const backBtn = document.getElementById("btn-back-to-settings");
     if (backBtn) {
-        backBtn.style.padding = "12px";
+        backBtn.style.padding = "10px";
         backBtn.style.width = "100%";
         backBtn.style.border = "none";
         backBtn.style.borderRadius = "6px";
         backBtn.style.cursor = "pointer";
-        backBtn.style.fontSize = "16px";
+        backBtn.style.fontSize = "14px";
+        backBtn.style.marginBottom = "10px";
         backBtn.addEventListener("click", () => {
             window.location.href = "settings.html";
         });
@@ -45,70 +46,87 @@ async function loadParticipantsSelection(communityId) {
         }
 
         players.sort((a, b) => {
-            const nameA = a.name || a.first_name || "";
-            const nameB = b.name || b.first_name || "";
-            return nameA.localeCompare(nameB);
+            const nameA = (a.name || a.first_name || "").trim();
+            const nameB = (b.name || b.first_name || "").trim();
+            return nameA.localeCompare(nameB, undefined, { sensitivity: 'accent' });
         });
 
-        const controlsDiv = document.createElement("div");
-        controlsDiv.style.display = "flex";
-        controlsDiv.style.gap = "10px";
-        controlsDiv.style.marginBottom = "15px";
-
-        const selectAllBtn = document.createElement("button");
-        selectAllBtn.textContent = "Select All";
-        selectAllBtn.style.cssText = "flex: 1; padding: 8px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;";
-        
-        const deselectAllBtn = document.createElement("button");
-        deselectAllBtn.textContent = "Deselect All";
-        deselectAllBtn.style.cssText = "flex: 1; padding: 8px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;";
-
-        controlsDiv.appendChild(selectAllBtn);
-        controlsDiv.appendChild(deselectAllBtn);
-        container.appendChild(controlsDiv);
-
-        // Список игроков с чекбоксами
         const listDiv = document.createElement("div");
         listDiv.style.display = "flex";
         listDiv.style.flexDirection = "column";
-        listDiv.style.gap = "8px";
-        listDiv.style.maxHeight = "300px";
+        listDiv.style.gap = "6px";
+        listDiv.style.maxHeight = "350px";
         listDiv.style.overflowY = "auto";
         listDiv.style.marginBottom = "15px";
         listDiv.style.border = "1px solid #ddd";
-        listDiv.style.padding = "10px";
+        listDiv.style.padding = "8px";
         listDiv.style.borderRadius = "6px";
 
-        const checkboxes = [];
+        const selectedPlayerIds = new Set();
+        const rowElements = new Map();
 
         players.forEach(p => {
-            const label = document.createElement("label");
-            label.style.display = "flex";
-            label.style.alignItems = "center";
-            label.style.gap = "10px";
-            label.style.cursor = "pointer";
-            label.style.padding = "4px 0";
+            const row = document.createElement("div");
+            row.style.display = "flex";
+            row.style.justifyContent = "space-between";
+            row.style.alignItems = "center";
+            row.style.padding = "8px 10px";
+            row.style.borderRadius = "4px";
+            row.style.cursor = "pointer";
+            row.style.backgroundColor = "#f8f9fa";
+            row.style.border = "1px solid #e9ecef";
 
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.value = p.id;
-            checkbox.checked = true; 
-            checkbox.style.width = "18px";
-            checkbox.style.height = "18px";
-
-            checkboxes.push(checkbox);
+            const infoDiv = document.createElement("div");
+            infoDiv.style.display = "flex";
+            infoDiv.style.flexDirection = "column";
+            infoDiv.style.gap = "2px";
 
             const playerName = p.name || p.first_name || "Unnamed";
-            const span = document.createElement("span");
-            span.textContent = `${playerName} (${p.gender || 'M'})`;
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = `${playerName} (${p.gender || 'M'})`;
+            nameSpan.style.fontWeight = "500";
+            nameSpan.style.fontSize = "14px";
 
-            label.appendChild(checkbox);
-            label.appendChild(span);
-            listDiv.appendChild(label);
+            infoDiv.appendChild(nameSpan);
+
+            if (p.username) {
+                const usernameSpan = document.createElement("span");
+                usernameSpan.textContent = `@${p.username}`;
+                usernameSpan.style.fontSize = "12px";
+                usernameSpan.style.color = "#666";
+                infoDiv.appendChild(usernameSpan);
+            }
+
+            // Индикатор статуса (например, галочка или текст)
+            const statusSpan = document.createElement("span");
+            statusSpan.textContent = "+";
+            statusSpan.style.fontSize = "16px";
+            statusSpan.style.fontWeight = "bold";
+            statusSpan.style.color = "#6c757d";
+
+            row.appendChild(infoDiv);
+            row.appendChild(statusSpan);
+
+            // Обработка клика по строке
+            row.addEventListener("click", () => {
+                if (selectedPlayerIds.has(p.id)) {
+                    selectedPlayerIds.delete(p.id);
+                    row.style.backgroundColor = "#f8f9fa";
+                    row.style.borderColor = "#e9ecef";
+                    statusSpan.textContent = "+";
+                    statusSpan.style.color = "#6c757d";
+                } else {
+                    selectedPlayerIds.add(p.id);
+                    row.style.backgroundColor = "#d1e7dd"; 
+                    row.style.borderColor = "#badbcc";
+                    statusSpan.textContent = "✓";
+                    statusSpan.style.color = "#0f5132";
+                }
+            });
+
+            rowElements.set(p.id, row);
+            listDiv.appendChild(row);
         });
-
-        selectAllBtn.addEventListener("click", () => checkboxes.forEach(cb => cb.checked = true));
-        deselectAllBtn.addEventListener("click", () => checkboxes.forEach(cb => cb.checked = false));
 
         container.appendChild(listDiv);
 
@@ -126,21 +144,21 @@ async function loadParticipantsSelection(communityId) {
         manualBtn.style.cssText = "padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;";
 
         autoBtn.addEventListener("click", () => {
-            const selectedIds = checkboxes.filter(cb => cb.checked).map(cb => Number(cb.value));
-            if (selectedIds.length === 0) {
-                alert("Please select at least one player!");
+            const selectedIdsArray = Array.from(selectedPlayerIds);
+            if (selectedIdsArray.length === 0) {
+                alert("Please select at least one player for the game!");
                 return;
             }
-            alert(`Auto-balancing for ${selectedIds.length} players (Coming next!)`);
+            alert(`Auto-balancing for ${selectedIdsArray.length} players (Coming next!)`);
         });
 
         manualBtn.addEventListener("click", () => {
-            const selectedIds = checkboxes.filter(cb => cb.checked).map(cb => Number(cb.value));
-            if (selectedIds.length === 0) {
-                alert("Please select at least one player!");
+            const selectedIdsArray = Array.from(selectedPlayerIds);
+            if (selectedIdsArray.length === 0) {
+                alert("Please select at least one player for the game!");
                 return;
             }
-            alert(`Manual setup for ${selectedIds.length} players (Coming next!)`);
+            alert(`Manual setup for ${selectedIdsArray.length} players (Coming next!)`);
         });
 
         actionsContainer.appendChild(autoBtn);
