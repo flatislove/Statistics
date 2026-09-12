@@ -27,8 +27,15 @@
             </div>
         </div>
 
-        <div class="card" id="edit-player-card" style="display: none; background-color: #f9f9f9; border: 2px dashed #007bff;">
-            <h2>Edit Player</h2>
+        <div class="card">
+            <h2>Edit & Delete Players</h2>
+            <div id="players-list">Loading players...</div>
+        </div>
+    </div>
+
+    <div id="edit-player-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0; margin-bottom: 15px;">Edit Player</h2>
             <input type="hidden" id="edit-player-id">
             <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
                 <input type="text" id="input-edit-player-first-name" placeholder="Player first name" style="width: 100%; padding: 12px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px;">
@@ -39,15 +46,10 @@
                     <option value="F">Female</option>
                 </select>
                 <div style="display: flex; gap: 10px;">
-                    <button id="btn-save-player" style="flex: 1; padding: 12px; cursor: pointer; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 6px;">Save Changes</button>
+                    <button id="btn-save-player" style="flex: 1; padding: 12px; cursor: pointer; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 6px;">Save</button>
                     <button id="btn-cancel-edit" style="padding: 12px; cursor: pointer; font-size: 16px; background-color: #6c757d; color: white; border: none; border-radius: 6px;">Cancel</button>
                 </div>
             </div>
-        </div>
-
-        <div class="card">
-            <h2>Edit & Delete Players</h2>
-            <div id="players-list">Loading players...</div>
         </div>
     </div>
 
