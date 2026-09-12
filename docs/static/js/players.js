@@ -45,7 +45,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        // Ключи payload строго соответствуют модели Player и PlayerCreate в bot.py
         const payload = {
             first_name: firstName,
             username: usernameInput ? usernameInput.value.trim().replace(/^@/, '') || null : null,
