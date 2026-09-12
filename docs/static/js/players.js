@@ -48,7 +48,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
             await createPlayer(Number(communityId), payload);
-            
             alert("Player successfully added!");
 
             firstNameInput.value = "";
@@ -104,7 +103,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Close modal when clicking outside the modal content
     const modal = document.getElementById("edit-player-modal");
     if (modal) {
         modal.addEventListener("click", (e) => {
@@ -183,15 +181,18 @@ async function loadPlayersList(communityId) {
             editBtn.style.padding = "6px 10px";
             editBtn.style.cursor = "pointer";
             editBtn.addEventListener("click", () => {
+                alert("Клик по Edit сработал!"); // Диагностика
                 const editModal = document.getElementById("edit-player-modal");
-                if (editModal) {
-                    editModal.style.display = "flex";
-                    document.getElementById("edit-player-id").value = p.id;
-                    document.getElementById("input-edit-player-first-name").value = playerName;
-                    document.getElementById("input-edit-player-username").value = p.username || "";
-                    document.getElementById("input-edit-player-telegram-id").value = p.telegram_id || "";
-                    document.getElementById("select-edit-player-gender").value = p.gender || "M";
+                if (!editModal) {
+                    alert("Ошибка: #edit-player-modal не найден в HTML!");
+                    return;
                 }
+                editModal.style.display = "flex";
+                document.getElementById("edit-player-id").value = p.id;
+                document.getElementById("input-edit-player-first-name").value = playerName;
+                document.getElementById("input-edit-player-username").value = p.username || "";
+                document.getElementById("input-edit-player-telegram-id").value = p.telegram_id || "";
+                document.getElementById("select-edit-player-gender").value = p.gender || "M";
             });
 
             const deleteBtn = document.createElement("button");
