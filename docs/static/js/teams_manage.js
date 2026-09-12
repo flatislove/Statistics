@@ -21,8 +21,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         backBtn.style.cursor = "pointer";
         backBtn.style.fontSize = "14px";
         backBtn.style.marginBottom = "10px";
-        backBtn.style.backgroundColor = "#6c757d";
-        backBtn.style.color = "white";
+        backBtn.style.backgroundColor = "var(--tg-theme-secondary-bg-color, #343a40)";
+        backBtn.style.color = "var(--tg-theme-text-color, #ffffff)";
         backBtn.addEventListener("click", () => {
             window.location.href = "settings.html";
         });
@@ -60,9 +60,10 @@ async function loadParticipantsSelection(communityId) {
         listDiv.style.maxHeight = "350px";
         listDiv.style.overflowY = "auto";
         listDiv.style.marginBottom = "15px";
-        listDiv.style.border = "1px solid var(--tg-theme-hint-color, #ccc)";
+        listDiv.style.border = "1px solid var(--tg-theme-hint-color, #444)";
         listDiv.style.padding = "8px";
         listDiv.style.borderRadius = "6px";
+        listDiv.style.backgroundColor = "var(--tg-theme-bg-color, #181818)";
 
         const selectedPlayerIds = new Set();
         const rowElements = new Map();
@@ -72,11 +73,11 @@ async function loadParticipantsSelection(communityId) {
             row.style.display = "flex";
             row.style.justifyContent = "space-between";
             row.style.alignItems = "center";
-            row.style.padding = "8px 10px";
+            row.style.padding = "10px";
             row.style.borderRadius = "4px";
             row.style.cursor = "pointer";
-            row.style.backgroundColor = "var(--tg-theme-secondary-bg-color, #f8f9fa)";
-            row.style.border = "1px solid var(--tg-theme-hint-color, #e9ecef)";
+            row.style.backgroundColor = "var(--tg-theme-secondary-bg-color, #2c2c2c)";
+            row.style.border = "1px solid var(--tg-theme-hint-color, #444)";
 
             const infoDiv = document.createElement("div");
             infoDiv.style.display = "flex";
@@ -88,7 +89,7 @@ async function loadParticipantsSelection(communityId) {
             nameSpan.textContent = `${playerName} (${p.gender || 'M'})`;
             nameSpan.style.fontWeight = "600";
             nameSpan.style.fontSize = "14px";
-            nameSpan.style.color = "var(--tg-theme-text-color, #212529)";
+            nameSpan.style.color = "var(--tg-theme-text-color, #ffffff)";
 
             infoDiv.appendChild(nameSpan);
 
@@ -96,7 +97,7 @@ async function loadParticipantsSelection(communityId) {
                 const usernameSpan = document.createElement("span");
                 usernameSpan.textContent = `@${p.username}`;
                 usernameSpan.style.fontSize = "12px";
-                usernameSpan.style.color = "var(--tg-theme-hint-color, #6c757d)";
+                usernameSpan.style.color = "var(--tg-theme-hint-color, #aaaaaa)";
                 infoDiv.appendChild(usernameSpan);
             }
 
@@ -104,26 +105,28 @@ async function loadParticipantsSelection(communityId) {
             statusSpan.textContent = "+";
             statusSpan.style.fontSize = "16px";
             statusSpan.style.fontWeight = "bold";
-            statusSpan.style.color = "var(--tg-theme-hint-color, #6c757d)";
+            statusSpan.style.color = "var(--tg-theme-hint-color, #aaaaaa)";
 
             row.appendChild(infoDiv);
             row.appendChild(statusSpan);
 
-            row.addEventListener("click", () => {
+row.addEventListener("click", () => {
                 if (selectedPlayerIds.has(p.id)) {
                     selectedPlayerIds.delete(p.id);
                     row.style.backgroundColor = "var(--tg-theme-secondary-bg-color, #f8f9fa)";
-                    row.style.borderColor = "var(--tg-theme-hint-color, #e9ecef)";
+                    row.style.borderColor = "var(--tg-theme-hint-color, #ced4da)";
                     nameSpan.style.color = "var(--tg-theme-text-color, #212529)";
+                    if (usernameSpan) usernameSpan.style.color = "var(--tg-theme-hint-color, #6c757d)";
                     statusSpan.textContent = "+";
                     statusSpan.style.color = "var(--tg-theme-hint-color, #6c757d)";
                 } else {
                     selectedPlayerIds.add(p.id);
-                    row.style.backgroundColor = "#d1e7dd"; // Мягкий зеленый при выборе
-                    row.style.borderColor = "#badbcc";
-                    nameSpan.style.color = "#0f5132";
+                    row.style.backgroundColor = "var(--tg-theme-button-color, #2481cc)";
+                    row.style.borderColor = "var(--tg-theme-button-color, #2481cc)";
+                    nameSpan.style.color = "var(--tg-theme-button-text-color, #ffffff)";
+                    if (usernameSpan) usernameSpan.style.color = "var(--tg-theme-button-text-color, #ffffff)";
                     statusSpan.textContent = "✓";
-                    statusSpan.style.color = "#0f5132";
+                    statusSpan.style.color = "var(--tg-theme-button-text-color, #ffffff)";
                 }
             });
 
