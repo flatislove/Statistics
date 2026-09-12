@@ -24,13 +24,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     teams = [
-        { id: 1, name: "Team A", playerIds: [] },
-        { id: 2, name: "Team B", playerIds: [] }
+        { id: 1, name: "K1", playerIds: [] },
+        { id: 2, name: "K2", playerIds: [] }
     ];
 
     document.getElementById("btn-add-team").addEventListener("click", () => {
         const newTeamId = teams.length > 0 ? Math.max(...teams.map(t => t.id)) + 1 : 1;
-        teams.push({ id: newTeamId, name: `Team ${String.fromCharCode(65 + teams.length)}`, playerIds: [] });
+        teams.push({ id: newTeamId, name: `K${teams.length + 1}`, playerIds: [] });
         renderUI();
     });
 
@@ -69,7 +69,7 @@ function renderUI() {
     } else {
         unassignedPlayers.forEach(p => {
             const chip = document.createElement("div");
-            chip.style.cssText = "background: var(--tg-theme-bg-color, #181818); border: 1px solid var(--tg-theme-hint-color, #444); padding: 6px 12px; border-radius: 16px; font-size: 13px; cursor: grab; color: var(--tg-theme-text-color, #fff); touch-action: none; user-select: none;";
+            chip.style.cssText = "background: var(--tg-theme-bg-color, #181818); border: 1px solid var(--tg-theme-hint-color, #444); padding: 6px 12px; border-radius: 16px; font-size: 13px; cursor: grab; color: var(--tg-theme-text-color, #fff); touch-action: none; user-select: none; display: flex; align-items: center; justify-content: center;";
             
             const playerName = p.name || p.first_name || "Player";
             chip.textContent = `${playerName} (${p.gender || 'M'})`;
@@ -119,14 +119,14 @@ function renderUI() {
                 if (!pObj) return;
 
                 const pRow = document.createElement("div");
-                pRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: var(--tg-theme-bg-color, #181818); padding: 5px 8px; border-radius: 4px; font-size: 12px; color: var(--tg-theme-text-color, #fff);";
+                pRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: var(--tg-theme-bg-color, #181818); padding: 3px 6px; border-radius: 4px; font-size: 12px; color: var(--tg-theme-text-color, #fff); height: 26px;";
                 
                 const pNameSpan = document.createElement("span");
                 pNameSpan.textContent = `${pObj.name || pObj.first_name} (${pObj.gender || 'M'})`;
 
                 const removeBtn = document.createElement("button");
                 removeBtn.textContent = "✕";
-                removeBtn.style.cssText = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 14px; font-weight: bold;";
+                removeBtn.style.cssText = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 13px; font-weight: bold; padding: 0 4px; margin-left: auto;";
                 removeBtn.addEventListener("click", () => {
                     team.playerIds = team.playerIds.filter(id => id !== playerId);
                     renderUI();
