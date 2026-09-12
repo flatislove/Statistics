@@ -38,14 +38,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         
         const firstName = firstNameInput.value.trim();
-        console.log("Player first name entered:", firstName);
+        console.log("Player name entered:", firstName);
 
         if (!firstName) {
-            alert("Player first name is required");
+            alert("Player name is required");
             return;
         }
 
         const payload = {
+            name: firstName,
             first_name: firstName,
             username: usernameInput ? usernameInput.value.trim().replace(/^@/, '') || null : null,
             telegram_id: telegramIdInput && telegramIdInput.value.trim() ? Number(telegramIdInput.value.trim()) : null,
@@ -87,7 +88,11 @@ async function loadPlayersList(communityId) {
             return;
         }
 
-        players.sort((a, b) => a.first_name.localeCompare(b.first_name));
+        players.sort((a, b) => {
+            const nameA = a.name || a.first_name || "";
+            const nameB = b.name || b.first_name || "";
+            return nameA.localeCompare(nameB);
+        });
 
         const ul = document.createElement("ul");
         ul.style.listStyle = "none";
@@ -110,8 +115,9 @@ async function loadPlayersList(communityId) {
             infoDiv.style.flexDirection = "column";
             infoDiv.style.gap = "2px";
 
+            const playerName = p.name || p.first_name || "Unnamed";
             const nameSpan = document.createElement("span");
-            nameSpan.textContent = p.first_name;
+            nameSpan.textContent = playerName;
             nameSpan.style.fontWeight = "bold";
 
             const detailsSpan = document.createElement("span");
@@ -134,11 +140,14 @@ async function loadPlayersList(communityId) {
             editBtn.style.padding = "6px 10px";
             editBtn.style.cursor = "pointer";
             editBtn.addEventListener("click", async () => {
-                const newFirstName = prompt("Edit player first name:", p.first_name);
+                const newFirstName = prompt("Edit player name:", playerName);
                 if (!newFirstName || !newFirstName.trim()) return;
 
                 try {
-                    await updatePlayer(p.id, { first_name: newFirstName.trim() });
+                    await updatePlayer(p.id, { 
+                        name: newFirstName.trim(),
+                        first_name: newFirstName.trim()
+                    });
                     await loadPlayersList(communityId);
                 } catch (error) {
                     alert("Error: " + error.message);
@@ -154,7 +163,7 @@ async function loadPlayersList(communityId) {
             deleteBtn.style.borderRadius = "4px";
             deleteBtn.style.cursor = "pointer";
             deleteBtn.addEventListener("click", async () => {
-                if (!confirm(`Are you sure you want to delete ${p.first_name}?`)) return;
+                if (!confirm(`Are you sure you want to delete ${playerName}?`)) return;
 
                 try {
                     await deletePlayer(p.id);
