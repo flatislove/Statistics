@@ -4,13 +4,16 @@ let selectedPlayersData = [];
 let teams = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+    const webApp = window.Telegram.WebApp;
+    if (webApp) {
+        webApp.ready();
+        webApp.expand();
     }
 
-    const communityId = localStorage.getItem("selected_community_id");
+    const communityId = localStorage.getItem("selected_community_id") || localStorage.getItem("current_community_id");
     const rawSelectedIds = localStorage.getItem("manual_selected_player_ids");
+    const matchDayId = localStorage.getItem("current_match_day_id");
+    const telegramId = webApp.initDataUnsafe?.user?.id;
 
     if (!communityId || !rawSelectedIds) {
         window.location.href = "teams_manage.html";
@@ -43,15 +46,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert("Failed to load players data.");
     }
 
-    document.getElementById("btn-save-match").addEventListener("click", () => {
+    document.getElementById("btn-save-match").addEventListener("click", async () => {
         const assignedCount = teams.reduce((acc, t) => acc + t.playerIds.length, 0);
         if (assignedCount === 0) {
             alert("Please assign at least some players to teams!");
             return;
         }
-        
+
         localStorage.setItem("saved_match_teams", JSON.stringify(teams));
-        alert("Teams saved successfully!");
+
+        if (!matchDayId) {
+            alert("Teams saved locally, but Match Day ID is missing for server sync.");
+            return;
+        }
+
+        const payload = {
+            teams: teams.map(t => ({
+                name: t.name,
+                player_ids: t.playerIds
+            }))
+        };
+
+        try {
+            const response = await fetch(`/api/match-days/${matchDayId}/lineup`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Telegram-Id": telegramId ? String(telegramId) : ""
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert("Teams successfully saved to database!");
+            } else {
+                const errData = await response.json();
+                alert(`Error: ${errData.detail || "Failed to save lineup on server."}`);
+            }
+        } catch (error) {
+            console.error("Server sync error:", error);
+            alert("Server connection error while saving lineup.");
+        }
     });
 });
 
@@ -65,17 +100,16 @@ function renderUI() {
     poolContainer.innerHTML = "";
 
     if (unassignedPlayers.length === 0) {
-        poolContainer.innerHTML = `<span style="font-size: 12px; color: var(--tg-theme-hint-color, #888); padding: 4px;">All players assigned!</span>`;
+        poolContainer.innerHTML = `<span style="font-size: 12px; color: var(--hint-color, #888); padding: 4px;">All players assigned!</span>`;
     } else {
         unassignedPlayers.forEach(p => {
             const chip = document.createElement("div");
-            chip.style.cssText = "background: var(--tg-theme-bg-color, #181818); border: 1px solid var(--tg-theme-hint-color, #444); padding: 6px 12px; border-radius: 16px; font-size: 13px; cursor: grab; color: var(--tg-theme-text-color, #fff); touch-action: none; user-select: none; display: flex; align-items: center; justify-content: center;";
+            chip.className = "player-chip";
             
             const playerName = p.name || p.first_name || "Player";
             chip.textContent = `${playerName} (${p.gender || 'M'})`;
 
             initTouchDrag(chip, p.id);
-
             poolContainer.appendChild(chip);
         });
     }
@@ -85,17 +119,17 @@ function renderUI() {
 
     teams.forEach((team) => {
         const teamCard = document.createElement("div");
-        teamCard.className = "team-drop-zone";
+        teamCard.className = "team-drop-zone card";
         teamCard.dataset.teamId = team.id;
-        teamCard.style.cssText = "background: var(--tg-theme-secondary-bg-color, #2c2c2c); border: 2px dashed var(--tg-theme-hint-color, #444); border-radius: 6px; padding: 10px; transition: background 0.2s;";
+        teamCard.style.cssText = "border: 2px dashed var(--hint-color, #444); padding: 12px; transition: background 0.2s; margin-bottom: 12px;";
 
         const teamHeader = document.createElement("div");
-        teamHeader.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--tg-theme-hint-color, #444); padding-bottom: 6px;";
+        teamHeader.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--hint-color, #444); padding-bottom: 6px;";
         
         const titleInput = document.createElement("input");
         titleInput.type = "text";
         titleInput.value = team.name;
-        titleInput.style.cssText = "background: transparent; border: none; color: var(--tg-theme-text-color, #fff); font-weight: bold; font-size: 14px; width: 100px;";
+        titleInput.style.cssText = "background: transparent; border: none; color: var(--text-color, #fff); font-weight: bold; font-size: 14px; width: 100px; margin: 0; padding: 4px;";
         titleInput.addEventListener("input", (e) => {
             team.name = e.target.value;
         });
@@ -104,13 +138,12 @@ function renderUI() {
         rightHeaderWrapper.style.cssText = "display: flex; align-items: center; gap: 8px;";
 
         const teamInfo = document.createElement("span");
-        teamInfo.style.cssText = "font-size: 12px; color: var(--tg-theme-hint-color, #aaa);";
+        teamInfo.style.cssText = "font-size: 12px; color: var(--hint-color, #aaa);";
         teamInfo.textContent = `${team.playerIds.length} players`;
 
-        // Кнопка удаления команды
         const removeTeamBtn = document.createElement("button");
         removeTeamBtn.textContent = "✕";
-        removeTeamBtn.style.cssText = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 14px; font-weight: bold; padding: 0 4px;";
+        removeTeamBtn.style.cssText = "background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 14px; font-weight: bold; width: auto; margin: 0; padding: 0 4px;";
         removeTeamBtn.addEventListener("click", () => {
             teams = teams.filter(t => t.id !== team.id);
             renderUI();
@@ -124,25 +157,26 @@ function renderUI() {
         teamCard.appendChild(teamHeader);
 
         const teamPlayersList = document.createElement("div");
-        teamPlayersList.style.cssText = "display: flex; flex-direction: column; gap: 4px; min-height: 35px;";
+        teamPlayersList.style.cssText = "display: flex; flex-direction: column; gap: 6px; min-height: 35px;";
 
         if (team.playerIds.length === 0) {
-            teamPlayersList.innerHTML = `<span style="font-size: 11px; color: var(--tg-theme-hint-color, #777); font-style: italic; padding: 2px;">Drop players here</span>`;
+            teamPlayersList.innerHTML = `<span style="font-size: 11px; color: var(--hint-color, #777); font-style: italic; padding: 2px;">Drop players here</span>`;
         } else {
             team.playerIds.forEach(playerId => {
                 const pObj = selectedPlayersData.find(x => x.id === playerId);
                 if (!pObj) return;
 
                 const pRow = document.createElement("div");
-                pRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: var(--tg-theme-bg-color, #181818); padding: 3px 8px; border-radius: 4px; font-size: 12px; color: var(--tg-theme-text-color, #fff); height: 26px;";
+                pRow.className = "player-chip";
+                pRow.style.width = "100%";
                 
-                const pNameSpan = document.createElement("span");
                 const playerName = pObj.name || pObj.first_name || "Player";
+                const pNameSpan = document.createElement("span");
                 pNameSpan.textContent = `${playerName} (${pObj.gender || 'M'})`;
 
                 const removeBtn = document.createElement("button");
+                removeBtn.className = "remove-player";
                 removeBtn.textContent = "✕";
-                removeBtn.style.cssText = "background: none; border: none; color: #dc3545; cursor: pointer; font-size: 13px; font-weight: bold; padding: 0; margin-left: auto;";
                 removeBtn.addEventListener("click", () => {
                     team.playerIds = team.playerIds.filter(id => id !== playerId);
                     renderUI();
@@ -180,8 +214,8 @@ function initTouchDrag(element, playerId) {
         clone.style.opacity = "0.85";
         clone.style.pointerEvents = "none";
         clone.style.boxShadow = "0 8px 16px rgba(0,0,0,0.4)";
-        clone.style.backgroundColor = "var(--tg-theme-button-color, #2481cc)";
-        clone.style.color = "var(--tg-theme-button-text-color, #fff)";
+        clone.style.backgroundColor = "var(--button-color)";
+        clone.style.color = "var(--button-text-color)";
 
         document.body.appendChild(clone);
         element.style.opacity = "0.4";
@@ -206,11 +240,11 @@ function initTouchDrag(element, playerId) {
                 touch.clientY >= zRect.top &&
                 touch.clientY <= zRect.bottom
             ) {
-                zone.style.borderColor = "#28a745";
-                zone.style.background = "var(--tg-theme-button-color, #1c3b2b)";
+                zone.style.borderColor = "#34c759";
+                zone.style.background = "var(--secondary-bg-color)";
             } else {
-                zone.style.borderColor = "var(--tg-theme-hint-color, #444)";
-                zone.style.background = "var(--tg-theme-secondary-bg-color, #2c2c2c)";
+                zone.style.borderColor = "var(--hint-color)";
+                zone.style.background = "var(--secondary-bg-color)";
             }
         });
     }, { passive: true });
@@ -226,8 +260,8 @@ function initTouchDrag(element, playerId) {
         let targetTeamId = null;
 
         dropZones.forEach(zone => {
-            zone.style.borderColor = "var(--tg-theme-hint-color, #444)";
-            zone.style.background = "var(--tg-theme-secondary-bg-color, #2c2c2c)";
+            zone.style.borderColor = "var(--hint-color)";
+            zone.style.background = "var(--secondary-bg-color)";
 
             const zRect = zone.getBoundingClientRect();
             if (

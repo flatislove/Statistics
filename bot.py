@@ -25,7 +25,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Подключаем роуты из отдельного файла api.py
 app.include_router(api_router)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
