@@ -7,6 +7,8 @@ from database.db import async_session
 from database.models import Community
 
 router = APIRouter(prefix="/api", tags=["Communities"])
+
+# Считываем ID из окружения Render
 OWNER_TELEGRAM_ID = int(os.environ.get("OWNER_TELEGRAM_ID", 0))
 
 class CommunityCreate(BaseModel):
@@ -28,10 +30,11 @@ async def create_community(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid Telegram ID format.")
 
+    # Проверка прав администратора
     if user_id != OWNER_TELEGRAM_ID:
         raise HTTPException(
             status_code=403, 
-            detail="Access denied. Only the main administrator can create communities."
+            detail=f"Access denied. Sent ID: {user_id}, Server expected OWNER_TELEGRAM_ID: {OWNER_TELEGRAM_ID}"
         )
 
     existing = await db.execute(select(Community).where(Community.invite_code == data.invite_code))
@@ -52,13 +55,15 @@ async def get_communities(db: AsyncSession = Depends(get_db)):
     return [{"id": c.id, "name": c.name, "invite_code": c.invite_code} for c in communities]
 
 @router.get("/check-admin")
-async def check_admin(x_telegram_id: str = Header(..., alias="X-Telegram-Id")):
+async def check_admin(x_telegram_id: str | None = Header(None, alias="X-Telegram-Id")):
+    if not x_telegram_id:
+        return {"is_admin": False}
     try:
         user_id = int(x_telegram_id)
     except ValueError:
         return {"is_admin": False}
     
-    is_admin = (user_id == OWNER_TELEGRAM_ID)
+    is_admin = (user_id == OWNER_TELEGRAM_ID and OWNER_TELEGRAM_ID != 0)
     return {"is_admin": is_admin}
 
 @router.get("/ping")
