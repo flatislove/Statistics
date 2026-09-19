@@ -36,38 +36,10 @@ async function handleRequest(url, options = {}) {
     return data;
 }
 
+// --- COMMUNITIES ---
+
 export async function fetchCommunities() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/communities`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error("Error in fetchCommunities:", error);
-        return [];
-    }
-}
-
-export async function checkAdminStatus() {
-    const telegramId = getTelegramId();
-    if (!telegramId) {
-        console.log("Admin check skipped: Telegram ID is 0");
-        return false;
-    }
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/check-admin`, {
-            headers: {
-                "X-Telegram-Id": telegramId.toString()
-            }
-        });
-        
-        if (!response.ok) return false;
-        const data = await response.json();
-        return data.is_admin;
-    } catch (error) {
-        console.error("Error in checkAdminStatus:", error);
-        return false;
-    }
+    return await handleRequest(`${API_BASE_URL}/communities`);
 }
 
 export async function createCommunity(name, inviteCode) {
@@ -85,15 +57,48 @@ export async function createCommunity(name, inviteCode) {
     });
 }
 
-export async function fetchPlayers(communityId) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/communities/${communityId}/players`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error("Error in fetchPlayers:", error);
-        return [];
+export async function checkAdminStatus() {
+    const telegramId = getTelegramId();
+    if (!telegramId) {
+        console.log("Admin check skipped: Telegram ID is 0");
+        return false;
     }
+
+    try {
+        const data = await handleRequest(`${API_BASE_URL}/check-admin`, {
+            headers: {
+                "X-Telegram-Id": telegramId.toString()
+            }
+        });
+        return data.is_admin;
+    } catch (error) {
+        console.error("Error in checkAdminStatus:", error);
+        return false;
+    }
+}
+
+// --- SETTINGS ---
+
+export async function fetchCommunitySettings(communityId) {
+    return await handleRequest(`${API_BASE_URL}/communities/${communityId}/settings`);
+}
+
+export async function updateCommunitySettings(communityId, payload) {
+    const telegramId = getTelegramId();
+    return await handleRequest(`${API_BASE_URL}/communities/${communityId}/settings`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Id": telegramId.toString()
+        },
+        body: JSON.stringify(payload)
+    });
+}
+
+// --- PLAYERS ---
+
+export async function fetchPlayers(communityId) {
+    return await handleRequest(`${API_BASE_URL}/communities/${communityId}/players`);
 }
 
 export async function createPlayer(communityId, playerPayload) {
@@ -131,15 +136,10 @@ export async function deletePlayer(playerId) {
     return true;
 }
 
+// --- MATCH DAYS & GAMES ---
+
 export async function fetchMatchDays(communityId) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/communities/${communityId}/match-days`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error("Error in fetchMatchDays:", error);
-        return [];
-    }
+    return await handleRequest(`${API_BASE_URL}/communities/${communityId}/match-days`);
 }
 
 export async function createMatchDay(communityId, payload) {
@@ -155,14 +155,23 @@ export async function createMatchDay(communityId, payload) {
 }
 
 export async function fetchMatchDayDetails(matchDayId) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/match-days/${matchDayId}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error("Error in fetchMatchDayDetails:", error);
-        return null;
-    }
+    return await handleRequest(`${API_BASE_URL}/match-days/${matchDayId}`);
+}
+
+export async function fetchMatchDayLineup(matchDayId) {
+    return await handleRequest(`${API_BASE_URL}/match-days/${matchDayId}/lineup`);
+}
+
+export async function updateMatchDayLineup(matchDayId, payload) {
+    const telegramId = getTelegramId();
+    return await handleRequest(`${API_BASE_URL}/match-days/${matchDayId}/lineup`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Id": telegramId.toString()
+        },
+        body: JSON.stringify(payload)
+    });
 }
 
 export async function createGame(matchDayId, payload) {
@@ -180,18 +189,6 @@ export async function createGame(matchDayId, payload) {
 export async function updateGameStats(gameId, payload) {
     const telegramId = getTelegramId();
     return await handleRequest(`${API_BASE_URL}/games/${gameId}/stats`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Telegram-Id": telegramId.toString()
-        },
-        body: JSON.stringify(payload)
-    });
-}
-
-export async function updateMatchDayLineup(matchDayId, payload) {
-    const telegramId = getTelegramId();
-    return await handleRequest(`${API_BASE_URL}/match-days/${matchDayId}/lineup`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
