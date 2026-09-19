@@ -4,7 +4,7 @@ let selectedPlayersData = [];
 let teams = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const webApp = window.Telegram.WebApp;
+    const webApp = window.Telegram?.WebApp;
     if (webApp) {
         webApp.ready();
         webApp.expand();
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const communityId = localStorage.getItem("selected_community_id") || localStorage.getItem("current_community_id");
     const rawSelectedIds = localStorage.getItem("manual_selected_player_ids");
     const matchDayId = localStorage.getItem("current_match_day_id");
-    const telegramId = webApp.initDataUnsafe?.user?.id;
+    const telegramId = webApp?.initDataUnsafe?.user?.id;
 
     if (!communityId || !rawSelectedIds) {
         window.location.href = "teams_manage.html";
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderUI();
     } catch (error) {
         console.error("Error loading players for manual setup:", error);
-        alert("Failed to load players data.");
+        alert(`Failed to load players data:\nName: ${error.name}\nMessage: ${error.message}`);
     }
 
     document.getElementById("btn-save-match").addEventListener("click", async () => {
@@ -67,8 +67,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             }))
         };
 
+        const requestUrl = `/api/match-days/${matchDayId}/lineup`;
+
         try {
-            const response = await fetch(`/api/match-days/${matchDayId}/lineup`, {
+            const response = await fetch(requestUrl, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -80,12 +82,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (response.ok) {
                 alert("Teams successfully saved to database!");
             } else {
-                const errData = await response.json();
-                alert(`Error: ${errData.detail || "Failed to save lineup on server."}`);
+                let errorDetails = "";
+                try {
+                    const errData = await response.json();
+                    errorDetails = JSON.stringify(errData);
+                } catch (e) {
+                    errorDetails = await response.text();
+                }
+                alert(`Server Error (${response.status}): ${errorDetails}\nURL: ${requestUrl}`);
             }
         } catch (error) {
             console.error("Server sync error:", error);
-            alert("Server connection error while saving lineup.");
+            alert(`Network/Connection Error:\nName: ${error.name}\nMessage: ${error.message}\nURL attempted: ${requestUrl}\nTelegram ID: ${telegramId || 'none'}`);
         }
     });
 });
