@@ -9,16 +9,23 @@
 </head>
 <body>
     <div class="container">
-        <h1>Admin Panel</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Admin Panel</h1>
+            <a href="index.html" style="text-decoration: none; font-size: 14px;">← Back</a>
+        </div>
         
-        <div class="card">
+        <!-- Блок статуса администратора -->
+        <div id="admin-status" style="margin-bottom: 10px; font-weight: bold;">Checking access...</div>
+
+        <!-- Форма создания комьюнити (по умолчанию скрыта до проверки) -->
+        <div class="card" id="admin-card" style="display: none;">
             <h2>Create New Community</h2>
             <form id="create-community-form">
-                <input type="text" id="community-name" placeholder="Name" required>
+                <input type="text" id="community-name" placeholder="Community Name" required>
                 <input type="text" id="invite-code" placeholder="Unique code (slug)" required>
-                <button type="submit">Create Community</button>
+                <button type="submit" id="btn-submit">Create Community</button>
             </form>
-            <div id="message"></div>
+            <div id="message" style="margin-top: 10px;"></div>
         </div>
 
         <div class="card">
