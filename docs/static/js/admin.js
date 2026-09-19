@@ -1,4 +1,13 @@
-import { fetchCommunities, createCommunity } from "./api.js";
+import { fetchCommunities, createCommunity, checkAdminStatus } from "./api.js";
+
+// Глобальный перехватчик ошибок для отображения прямо на экране
+window.addEventListener("error", (event) => {
+    const msgDiv = document.getElementById("message");
+    if (msgDiv) {
+        msgDiv.textContent = `JS Error: ${event.message}`;
+        msgDiv.style.color = "red";
+    }
+});
 
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("=== Admin JS Loaded & DOM Ready ===");
@@ -17,41 +26,64 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Получаем DOM-элементы
+    const adminStatusDiv = document.getElementById("admin-status");
+    const adminCard = document.getElementById("admin-card");
     const form = document.getElementById("create-community-form");
     const nameInput = document.getElementById("community-name");
     const codeInput = document.getElementById("invite-code");
     const messageDiv = document.getElementById("message");
     const listContainer = document.getElementById("communities-list");
 
-    // ЛОГИРОВАНИЕ НАЛИЧИЯ ЭЛЕМЕНТОВ
     console.log("DOM Elements Check:", {
-        "form (#create-community-form)": form,
-        "nameInput (#community-name)": nameInput,
-        "codeInput (#invite-code)": codeInput,
-        "messageDiv (#message)": messageDiv,
-        "listContainer (#communities-list)": listContainer
+        adminStatusDiv: !!adminStatusDiv,
+        adminCard: !!adminCard,
+        form: !!form,
+        nameInput: !!nameInput,
+        codeInput: !!codeInput,
+        messageDiv: !!messageDiv,
+        listContainer: !!listContainer
     });
 
-    if (!form) {
-        console.error("❌ CRITICAL ERROR: Form '#create-community-form' was not found in HTML!");
-    } else {
-        console.log("✅ Form found. Checking form visibility and computed style...");
-        const style = window.getComputedStyle(form);
-        console.log("Form CSS display status:", style.display, "| visibility:", style.visibility);
+    // 1. Проверка прав администратора
+    try {
+        const isAdmin = await checkAdminStatus();
+        console.log("Check Admin Result:", isAdmin);
+
+        if (isAdmin) {
+            if (adminStatusDiv) {
+                adminStatusDiv.textContent = "✓ Access Granted (Admin)";
+                adminStatusDiv.style.color = "green";
+            }
+            if (adminCard) {
+                adminCard.style.display = "block"; // Показываем форму создания
+            }
+        } else {
+            if (adminStatusDiv) {
+                adminStatusDiv.textContent = "✗ Access Denied: You are not authorized as admin.";
+                adminStatusDiv.style.color = "red";
+            }
+            if (adminCard) {
+                adminCard.style.display = "none";
+            }
+        }
+    } catch (e) {
+        console.error("Failed to check admin status:", e);
+        if (adminStatusDiv) {
+            adminStatusDiv.textContent = "Error checking access: " + e.message;
+            adminStatusDiv.style.color = "red";
+        }
     }
 
+    // 2. Функция загрузки списка сообществ
     async function loadList() {
-        if (!listContainer) {
-            console.warn("listContainer not found, skipping loadList()");
-            return;
-        }
+        if (!listContainer) return;
 
         console.log("Fetching communities list...");
-        listContainer.innerHTML = "<p><em>Loading from server...</em></p>";
+        listContainer.innerHTML = "<p><em>Loading communities from server...</em></p>";
 
         try {
             const communities = await fetchCommunities();
-            console.log("Communities received from server:", communities);
+            console.log("Communities received:", communities);
             listContainer.innerHTML = "";
 
             if (!Array.isArray(communities) || communities.length === 0) {
@@ -75,25 +107,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    // 3. Обработка формы создания сообщества
     if (form) {
-        console.log("Attaching 'submit' event listener to #create-community-form...");
-        
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             console.log("Form submit event triggered!");
 
             if (messageDiv) {
-                messageDiv.textContent = "";
-                messageDiv.className = "";
+                messageDiv.textContent = "Sending request to server...";
+                messageDiv.style.color = "blue";
             }
 
             const name = nameInput ? nameInput.value.trim() : "";
             const code = codeInput ? codeInput.value.trim() : "";
 
-            console.log("Submitting form with payload:", { name, code });
-
             if (!name || !code) {
-                console.warn("Validation failed: empty fields");
                 if (messageDiv) {
                     messageDiv.textContent = "Please fill in all fields.";
                     messageDiv.style.color = "red";
@@ -102,17 +130,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             try {
-                console.log("Calling createCommunity API...");
                 const result = await createCommunity(name, code);
                 console.log("Community created successfully:", result);
 
                 if (messageDiv) {
-                    messageDiv.textContent = "Community successfully created!";
+                    messageDiv.textContent = `Community "${result.name || name}" created successfully!`;
                     messageDiv.style.color = "green";
                 }
+
                 if (nameInput) nameInput.value = "";
                 if (codeInput) codeInput.value = "";
-                
+
                 await loadList();
             } catch (error) {
                 console.error("Error during createCommunity API call:", error);
@@ -124,6 +152,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Запускаем загрузку списка
-    loadList();
+    // Запускаем первичное получение списка
+    await loadList();
 });

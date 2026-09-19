@@ -1,37 +1,50 @@
 import { checkAdminStatus } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-    }
+    const statusText = document.getElementById("login-status");
+    const retryBtn = document.getElementById("btn-retry-login");
 
-    const statusEl = document.getElementById("login-status");
-    
-    try {
-        const isAdmin = await checkAdminStatus();
-        
-        if (isAdmin) {
-            statusEl.innerText = "Authorization successful! Redirecting...";
-            setTimeout(() => {
-                const savedId = localStorage.getItem("selected_community_id");
-                if (savedId) {
-                    window.location.href = "dashboard.html";
-                } else {
-                    window.location.href = "index.html";
-                }
-            }, 1000);
-        } else {
-            statusEl.innerText = "Access denied. You are not an administrator.";
-            document.getElementById("btn-retry-login").style.display = "inline-block";
+    async function performLogin() {
+        if (statusText) {
+            statusText.textContent = "Checking Telegram account...";
+            statusText.style.color = "inherit";
         }
-    } catch (error) {
-        console.error(error);
-        statusEl.innerText = "Server connection error.";
-        document.getElementById("btn-retry-login").style.display = "inline-block";
+        if (retryBtn) retryBtn.style.display = "none";
+
+        try {
+            // Проверяем админские права на бэкенде
+            const isAdmin = await checkAdminStatus();
+
+            if (isAdmin) {
+                if (statusText) {
+                    statusText.textContent = "Access granted! Redirecting to Admin Panel...";
+                    statusText.style.color = "green";
+                }
+                // Успешно — переходим в админку для создания комьюнити
+                setTimeout(() => {
+                    window.location.href = "admin.html";
+                }, 800);
+            } else {
+                if (statusText) {
+                    statusText.textContent = "Access denied. You are not authorized as administrator.";
+                    statusText.style.color = "red";
+                }
+                if (retryBtn) retryBtn.style.display = "inline-block";
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            if (statusText) {
+                statusText.textContent = "Connection error. Make sure backend is awake.";
+                statusText.style.color = "red";
+            }
+            if (retryBtn) retryBtn.style.display = "inline-block";
+        }
     }
 
-    document.getElementById("btn-retry-login").addEventListener("click", () => {
-        location.reload();
-    });
+    if (retryBtn) {
+        retryBtn.addEventListener("click", performLogin);
+    }
+
+    // Запускаем проверку при загрузке страницы
+    performLogin();
 });
