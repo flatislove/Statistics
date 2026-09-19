@@ -246,6 +246,7 @@ async def delete_player(
 @router.post("/communities/{community_id}/match-days")
 async def create_match_day(
     community_id: int,
+    data: MatchDayCreate = None, # Исправлено: теперь принимает тело запроса с датой
     x_telegram_id: str = Header(..., alias="X-Telegram-Id"),
     db: AsyncSession = Depends(get_db)
 ):
@@ -264,7 +265,8 @@ async def create_match_day(
     new_match_day = MatchDay(
         community_id=community_id,
         format_type=comm.format_type,
-        target_wins=comm.target_wins
+        target_wins=comm.target_wins,
+        date=data.date if data else None # Сохраняем дату, если она передана
     )
     db.add(new_match_day)
     await db.commit()
@@ -274,7 +276,8 @@ async def create_match_day(
         "status": "success",
         "match_day_id": new_match_day.id,
         "format_type": new_match_day.format_type,
-        "target_wins": new_match_day.target_wins
+        "target_wins": new_match_day.target_wins,
+        "date": new_match_day.date
     }
 
 @router.get("/match-days/{match_day_id}/lineup")
