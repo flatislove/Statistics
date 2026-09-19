@@ -1,32 +1,18 @@
 import os
 import asyncio
 import logging
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-from database.db import engine, Base
-from api import router as api_router
-
+from database.db import engine
+from database.models import Base
+from api import app  # Импортируем готовое FastAPI приложение
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://flatislove.github.io/Statistics/")
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(api_router)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
