@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database.models import Base, engine
+
+# Разделяем импорты: engine берем из database.db, а Base из database.models
+from database.db import engine
+from database.models import Base
 
 # Импортируем роутеры из папки routers
 from routers import communities, settings, players, match, teams, reports
