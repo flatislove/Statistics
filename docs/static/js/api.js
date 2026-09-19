@@ -188,3 +188,15 @@ export async function updateGameStats(gameId, payload) {
         body: JSON.stringify(payload)
     });
 }
+
+export async function updateMatchDayLineup(matchDayId, payload) {
+    const telegramId = getTelegramId();
+    return await handleRequest(`${API_BASE_URL}/match-days/${matchDayId}/lineup`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Telegram-Id": telegramId.toString()
+        },
+        body: JSON.stringify(payload)
+    });
+}

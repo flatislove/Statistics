@@ -6,13 +6,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.Telegram.WebApp.expand();
     }
 
-    const communityId = localStorage.getItem("selected_community_id");
-    if (!communityId) {
+    const communityIdStr = localStorage.getItem("selected_community_id");
+    const communityId = communityIdStr ? Number(communityIdStr) : null;
+
+    if (!communityId || isNaN(communityId)) {
+        alert("Community ID is missing or invalid. Redirecting to home.");
         window.location.href = "index.html";
         return;
     }
 
-    await loadPlayersList(Number(communityId));
+    await loadPlayersList(communityId);
 
     const addBtn = document.getElementById("btn-add-player");
     if (!addBtn) {
@@ -47,16 +50,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
 
         try {
-            await createPlayer(Number(communityId), payload);
+            console.log("Sending createPlayer payload to community:", communityId, payload);
+            await createPlayer(communityId, payload);
             alert("Player successfully added!");
 
             firstNameInput.value = "";
             if (usernameInput) usernameInput.value = "";
             if (telegramIdInput) telegramIdInput.value = "";
             
-            await loadPlayersList(Number(communityId));
+            await loadPlayersList(communityId);
         } catch (error) {
-            alert("Server error: " + error.message);
+            console.error("Create player error details:", error);
+            alert(`Server error on create player:\n${error.message}`);
         }
     });
 
@@ -89,9 +94,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 await updatePlayer(Number(id), payload);
                 alert("Player successfully updated!");
                 document.getElementById("edit-player-modal").style.display = "none";
-                await loadPlayersList(Number(communityId));
+                await loadPlayersList(communityId);
             } catch (error) {
-                alert("Error: " + error.message);
+                alert(`Error updating player:\n${error.message}`);
             }
         });
     }
@@ -194,7 +199,7 @@ async function loadPlayersList(communityId) {
                 document.getElementById("select-edit-player-gender").value = p.gender || "M";
             });
 
-            const deleteBtn = document.createElement("button");
+            const deleteBtn = document.getElementById("button") || document.createElement("button");
             deleteBtn.textContent = "Delete";
             deleteBtn.style.padding = "6px 10px";
             deleteBtn.style.backgroundColor = "#dc3545";
@@ -209,7 +214,7 @@ async function loadPlayersList(communityId) {
                     await deletePlayer(p.id);
                     await loadPlayersList(communityId);
                 } catch (error) {
-                    alert("Error: " + error.message);
+                    alert("Error deleting player: " + error.message);
                 }
             });
 
@@ -223,6 +228,7 @@ async function loadPlayersList(communityId) {
 
         listContainer.appendChild(ul);
     } catch (error) {
-        listContainer.innerHTML = "<p>No players found.</p>";
+        console.error("Error loading players list:", error);
+        listContainer.innerHTML = "<p>Error loading players list.</p>";
     }
 }
