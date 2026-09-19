@@ -9,6 +9,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from database.db import engine, Base
 from api import router as api_router
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
